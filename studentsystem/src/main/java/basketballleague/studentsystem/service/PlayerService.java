@@ -1,5 +1,6 @@
 package basketballleague.studentsystem.service;
 
+import basketballleague.studentsystem.dto.TeamPlayersDTO;
 import basketballleague.studentsystem.model.Player;
 import org.springframework.stereotype.Service;
 
@@ -12,4 +13,7 @@ public interface PlayerService {
     void deletePlayer(Integer playerId);
     List<Player> getAllPlayers();
     Player getPlayerByNameAndTeam(String name, String teamName);
+    // În PlayerService.java
+    TeamPlayersDTO getPlayersAndTeamInfoByTeamName(String teamName);
+
 }
