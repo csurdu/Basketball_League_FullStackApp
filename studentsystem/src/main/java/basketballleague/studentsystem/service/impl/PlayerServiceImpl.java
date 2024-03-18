@@ -1,5 +1,6 @@
 package basketballleague.studentsystem.service.impl;
 
+import basketballleague.studentsystem.dto.TeamPlayersDTO;
 import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Team;
 import basketballleague.studentsystem.repository.PlayerRepository;
@@ -56,6 +57,15 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findByNameAndTeam_Name(name, teamName)
                 .orElseThrow(() -> new RuntimeException("Player not found"));
     }
+
+    @Override
+    public TeamPlayersDTO getPlayersAndTeamInfoByTeamName(String teamName) {
+        Team team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        List<Player> players = playerRepository.findByTeam_Name(teamName);
+        return new TeamPlayersDTO(team.getName(), team.getYear(), players);
+    }
+
 }
 
 
