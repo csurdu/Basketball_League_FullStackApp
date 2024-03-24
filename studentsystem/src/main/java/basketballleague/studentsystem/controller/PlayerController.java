@@ -1,5 +1,6 @@
 package basketballleague.studentsystem.controller;
 
+import basketballleague.studentsystem.dto.PlayerDTO;
 import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,14 @@ public class PlayerController {
     public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
     }
+    @GetMapping("/{playerId}")
+    public PlayerDTO getPlayer(@PathVariable int playerId) {
+        return playerService.getPlayer(playerId);
+    }
 
     @PostMapping("/add")
     public Player savePlayer(@RequestBody Player player) {
-        return playerService.savePlayer(player);
+        return playerService.addPlayer(player);
     }
 
     @DeleteMapping("/{playerId}")
@@ -28,12 +33,13 @@ public class PlayerController {
     }
 
     @GetMapping
-    public List<Player> getAllPlayers() {
+    public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers();
     }
-
-    @GetMapping("/search")
-    public Player getPlayerByNameAndTeam(@RequestParam String name, @RequestParam String teamName) {
-        return playerService.getPlayerByNameAndTeam(name, teamName);
+    @PutMapping("/{playerId}/joinTeam/{teamName}")
+    public Player joinTeam(@PathVariable int playerId, @PathVariable String teamName) {
+        return playerService.joinTeam(playerId, teamName);
     }
+
+
 }

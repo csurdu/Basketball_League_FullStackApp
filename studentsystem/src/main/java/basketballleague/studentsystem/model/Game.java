@@ -15,17 +15,20 @@ public class Game {
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team1_id", referencedColumnName = "id") // Schimbă numele coloanei pentru prima echipă
-    private Team team1;
+    @JoinColumn(name = "team1_id", referencedColumnName = "id", nullable = true,
+            foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    private Team homeTeam;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team2_id", referencedColumnName = "id") // Schimbă numele coloanei pentru a doua echipă
-    private Team team2;
+    @JoinColumn(name = "team2_id", referencedColumnName = "id", nullable = true,
+            foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
+    private Team awayTeam;
 
     private String date;
     private int hour;
 
-    private int score;
+    private int homeTeamScore;
+    private int awayTeamScore;
 
 
 

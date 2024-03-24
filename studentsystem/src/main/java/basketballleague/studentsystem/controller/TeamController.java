@@ -24,28 +24,37 @@ public class TeamController {
     }
 
     @PostMapping("/add")
-    public Team saveTeam(@RequestBody Team team) {
-        return teamService.saveTeam(team);
+    public Team addTeam(@RequestBody Team team) {
+        return teamService.addTeam(team);
     }
 
-    @DeleteMapping("/{teamId}")
-    public void deleteTeam(@PathVariable Integer teamId) {
+    @PutMapping
+    public Team updateTeam(@RequestBody Team team) {
+        return teamService.updateTeam(team);
+    }
+
+    @DeleteMapping("/delete/{teamId}")
+    public void deleteTeam(@PathVariable int teamId) {
         teamService.deleteTeam(teamId);
+    }
+    @DeleteMapping("/delete/all")
+    public void deleteAll() {
+        teamService.deleteAll();
+    }
+
+    @GetMapping("/{teamId}")
+    public Team getTeamById(@PathVariable int teamId) {
+        return teamService.getTeam(teamId);
     }
 
     @GetMapping
     public List<Team> getAllTeams() {
         return teamService.getAllTeams();
     }
+    @GetMapping("/name/{teamName}")
+    public Team getTeamByName(@PathVariable String teamName) {
+        return teamService.getTeambyName(teamName);
+    }
 
-    @GetMapping("/search")
-    public Team getTeamByName(@RequestParam String name) {
-        return teamService.getTeamByName(name);
-    }
-    // În TeamController.java
-    @GetMapping("/players")
-    public TeamPlayersDTO getPlayersAndTeamInfoByTeamName(@RequestParam  String teamName) {
-        return playerService.getPlayersAndTeamInfoByTeamName(teamName);
-    }
 
 }

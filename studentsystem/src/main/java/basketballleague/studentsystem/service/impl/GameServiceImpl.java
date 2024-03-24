@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Service
 public class GameServiceImpl implements GameService {
+
     private final GameRepository gameRepository;
 
     @Autowired
@@ -24,14 +25,8 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void deleteGame(int id) {
-        gameRepository.deleteById(id);
-    }
-
-    @Override
-    public Game getGameById(int id) {
-        Optional<Game> game = gameRepository.findById(id);
-        return game.orElse(null);
+    public Optional<Game> getGame(int id) {
+        return gameRepository.findById(id);
     }
 
     @Override
@@ -43,4 +38,15 @@ public class GameServiceImpl implements GameService {
     public Game updateGame(Game game) {
         return gameRepository.save(game);
     }
+
+    @Override
+    public void deleteGame(int id) {
+        gameRepository.deleteById(id);
+    }
+    @Override
+    public void deleteAll()
+    {
+        gameRepository.deleteAll();
+    }
+
 }

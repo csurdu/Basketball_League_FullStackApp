@@ -6,8 +6,11 @@ import java.util.List;
 
 public interface TeamService {
 
-    Team saveTeam(Team team);
-    void deleteTeam(Integer teamId);
+    Team addTeam(Team team);
+    void deleteTeam(int teamId);
+    Team getTeam(int teamId);
+    Team getTeambyName(String name);
     List<Team> getAllTeams();
-    Team getTeamByName(String name);
+    Team updateTeam(Team team);
+    void deleteAll();
 }

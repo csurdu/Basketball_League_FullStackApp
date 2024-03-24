@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -27,10 +28,14 @@ public class GameController {
     public void deleteGame(@PathVariable int id) {
         gameService.deleteGame(id);
     }
+    @DeleteMapping("/delete/all")
+    public void deleteAll() {
+        gameService.deleteAll();
+    }
 
     @GetMapping("/get/{id}")
-    public Game getGameById(@PathVariable int id) {
-        return gameService.getGameById(id);
+    public Optional<Game> getGameById(@PathVariable int id) {
+        return gameService.getGame(id);
     }
 
     @GetMapping("/all")
@@ -42,4 +47,5 @@ public class GameController {
     public Game updateGame(@RequestBody Game game) {
         return gameService.updateGame(game);
     }
+
 }
