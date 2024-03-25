@@ -1,7 +1,6 @@
 package basketballleague.studentsystem.controller;
 
-import basketballleague.studentsystem.dto.TeamPlayersDTO;
-import basketballleague.studentsystem.model.Player;
+import basketballleague.studentsystem.dto.TeamDTO;
 import basketballleague.studentsystem.model.Team;
 import basketballleague.studentsystem.service.PlayerService;
 import basketballleague.studentsystem.service.TeamService;
@@ -54,6 +53,38 @@ public class TeamController {
     @GetMapping("/name/{teamName}")
     public Team getTeamByName(@PathVariable String teamName) {
         return teamService.getTeambyName(teamName);
+    }
+    @GetMapping("/points/ascending")
+    public List<TeamDTO> getAllTeamsSortedByPointsAsc() {
+        return teamService.findAllTeamsSortedByPoints();
+    }
+    @GetMapping("/rebounds/ascending")
+    public List<TeamDTO> getAllTeamsSortedByReboundsAsc() {
+        return teamService.findAllTeamsSortedByRebounds();
+    }
+    @GetMapping("/steals/ascending")
+    public List<TeamDTO> getAllTeamsSortedByStealsAsc() {
+        return teamService.findAllTeamsSortedBySteals();
+    }
+    @GetMapping("/assists/ascending")
+    public List<TeamDTO> getAllTeamsSortedByAssistsAsc() {
+        return teamService.findAllTeamsSortedByAssists();
+    }
+    @GetMapping("/points/descending")
+    public List<TeamDTO> getAllTeamsSortedByPointsDsc() {
+        return teamService.findAllTeamsSortedByPointsDsc();
+    }
+    @GetMapping("/rebounds/descending")
+    public List<TeamDTO> getAllTeamsSortedByReboundsDsc() {
+        return teamService.findAllTeamsSortedByReboundsDsc();
+    }
+    @GetMapping("/steals/descending")
+    public List<TeamDTO> getAllTeamsSortedByStealsDsc() {
+        return teamService.findAllTeamsSortedByStealsDsc();
+    }
+    @GetMapping("/assists/descending")
+    public List<TeamDTO> getAllTeamsSortedByAssistsDsc() {
+        return teamService.findAllTeamsSortedByAssistsDsc();
     }
 
 

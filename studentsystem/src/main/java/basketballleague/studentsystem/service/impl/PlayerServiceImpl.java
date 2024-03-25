@@ -10,8 +10,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -85,10 +87,115 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public List<PlayerDTO> findByOrderByPointsPerGameAsc() {
+        return playerRepository.findByOrderByPointsPerGameAsc()
+                .stream()
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByReboundsPerGameAsc() {
+        return playerRepository.findByOrderByReboundsPerGameAsc()
+                .stream()
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByStealsPerGameAsc() {
+        return playerRepository.findByOrderByStealsPerGameAsc()
+                .stream()
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByAssistsPerGameAsc() {
+        return playerRepository.findByOrderByAssistsPerGameAsc()
+                .stream()
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByPointsPerGameDsc() {
+        return playerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Player::getPointsPerGame).reversed()) // Descending order
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByReboundsPerGameDsc() {
+        return playerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Player::getReboundsPerGame).reversed()) // Descending order
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByStealsPerGameDsc() {
+        return playerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Player::getStealsPerGame).reversed()) // Descending order
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerDTO> findByOrderByAssistsPerGameDsc() {
+        return playerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Player::getAssistsPerGame).reversed()) // Descending order
+                .map(this::convertToPlayerDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public void deletePlayer(int id) {
         playerRepository.deleteById(id);
     }
 
+    @Override
+    public void populateDatabaseWithFakeData() {
+        List<Player> fakePlayers = new ArrayList<>();
+        // Generate fake data for players
+        for (int i = 1; i <= 20; i++) {
+            Player player = new Player();
+            player.setFirstName("First" + i);
+            player.setLastName("Last" + i);
+            player.setHeight(String.valueOf((int) (Math.random() * 20) + 180)); // Random height between 180cm and 200cm
+            player.setPointsPerGame((int) Math.round(Math.random() * 30)); // Random points per game
+            player.setReboundsPerGame((int) Math.round(Math.random() * 10)); // Random rebounds per game
+            player.setStealsPerGame((int) Math.round(Math.random() * 5)); // Random steals per game
+            player.setAssistsPerGame((int) Math.round(Math.random() * 10)); // Random assists per game
+            // Add more fields as needed
+            fakePlayers.add(player);
+        }
+
+        // Save fake players to the database
+        playerRepository.saveAll(fakePlayers);
+    }
+    public void assignPlayersToRandomTeams() {
+        List<Player> playersWithoutTeam = playerRepository.findPlayersWithoutTeam(); // Implement this query
+        List<Team> availableTeams = teamRepository.findAll(); // Assumes you have this method
+
+        if (availableTeams.isEmpty()) {
+            throw new IllegalStateException("No teams available for assignment.");
+        }
+
+        Random random = new Random();
+        playersWithoutTeam.forEach(player -> {
+            // Assign a random team to each player
+            Team randomTeam = availableTeams.get(random.nextInt(availableTeams.size()));
+            player.setTeam(randomTeam); // Assuming Player has a setTeam method
+            playerRepository.save(player);
+        });
+    }
 
 }
 

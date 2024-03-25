@@ -4,7 +4,6 @@ import basketballleague.studentsystem.dto.PlayerDTO;
 import basketballleague.studentsystem.model.Player;
 
 import java.util.List;
-import java.util.Optional;
 
 
 public interface PlayerService {
@@ -14,5 +13,20 @@ public interface PlayerService {
     List<PlayerDTO> getAllPlayers();
     Player joinTeam(int playerId, String teamName);
     Player updatePlayer(Player player);
+    List<PlayerDTO> findByOrderByPointsPerGameAsc();
+
+    // Similarly for rebounds, steals, and assists
+    List<PlayerDTO> findByOrderByReboundsPerGameAsc();
+    List<PlayerDTO> findByOrderByStealsPerGameAsc();
+    List<PlayerDTO> findByOrderByAssistsPerGameAsc();
+
+    List<PlayerDTO> findByOrderByPointsPerGameDsc();
+
+    // Similarly for rebounds, steals, and assists
+    List<PlayerDTO> findByOrderByReboundsPerGameDsc();
+    List<PlayerDTO> findByOrderByStealsPerGameDsc();
+    List<PlayerDTO> findByOrderByAssistsPerGameDsc();
+    public void populateDatabaseWithFakeData();
+    public void assignPlayersToRandomTeams();
 
 }
