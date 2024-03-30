@@ -9,6 +9,7 @@ import java.util.List;
 public interface PlayerService {
     Player addPlayer(Player player);
     void deletePlayer(int playerId);
+    void deleteAll();
     PlayerDTO getPlayer(int playerId);
     List<PlayerDTO> getAllPlayers();
     Player joinTeam(int playerId, String teamName);

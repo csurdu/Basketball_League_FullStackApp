@@ -161,6 +161,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public void deleteAll() {
+        playerRepository.deleteAll();
+    }
+
+    @Override
     public void populateDatabaseWithFakeData() {
         List<Player> fakePlayers = new ArrayList<>();
         // Generate fake data for players

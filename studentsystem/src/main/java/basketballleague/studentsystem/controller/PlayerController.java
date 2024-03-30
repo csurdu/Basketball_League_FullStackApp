@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/player")
 public class PlayerController {
@@ -92,6 +92,17 @@ public class PlayerController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body("Failed to assign players to teams: " + e.getMessage());
         }
+    }
+
+    @DeleteMapping("/deleteAll")
+    public Exception deleteAllPlayers() {
+        try {
+            playerService.deleteAll();
+
+        } catch (Exception e) {
+            return new Exception("Failde to delete all players");
+        }
+        return null;
     }
 
 }
