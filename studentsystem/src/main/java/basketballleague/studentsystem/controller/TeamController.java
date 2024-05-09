@@ -1,6 +1,7 @@
 package basketballleague.studentsystem.controller;
 
 import basketballleague.studentsystem.dto.TeamDTO;
+import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Team;
 import basketballleague.studentsystem.service.PlayerService;
 import basketballleague.studentsystem.service.TeamService;
@@ -32,9 +33,9 @@ public class TeamController {
         return teamService.updateTeam(team);
     }
 
-    @DeleteMapping("/delete/{teamId}")
-    public void deleteTeam(@PathVariable int teamId) {
-        teamService.deleteTeam(teamId);
+    @DeleteMapping("/delete/{teamName}")
+    public void deleteTeam(@PathVariable String teamName) {
+        teamService.deleteTeam(teamName);
     }
     @DeleteMapping("/delete/all")
     public void deleteAll() {
@@ -54,6 +55,8 @@ public class TeamController {
     public Team getTeamByName(@PathVariable String teamName) {
         return teamService.getTeambyName(teamName);
     }
+
+
     @GetMapping("/points/ascending")
     public List<TeamDTO> getAllTeamsSortedByPointsAsc() {
         return teamService.findAllTeamsSortedByPoints();

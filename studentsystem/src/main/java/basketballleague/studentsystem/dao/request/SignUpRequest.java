@@ -1,5 +1,6 @@
 package basketballleague.studentsystem.dao.request;
 
+import basketballleague.studentsystem.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class SignUpRequest {
     private String lastName;
     private String email;
     private String password;
+    private String height;
+    private Role role;
 }

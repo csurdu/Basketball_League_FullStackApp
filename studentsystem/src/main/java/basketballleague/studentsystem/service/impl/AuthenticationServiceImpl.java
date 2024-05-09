@@ -1,11 +1,12 @@
 package basketballleague.studentsystem.service.impl;
 
 
-import basketballleague.studentsystem.dao.request.SignUpRequest;
 import basketballleague.studentsystem.dao.request.SigninRequest;
 import basketballleague.studentsystem.dao.response.JwtAuthenticationResponse;
+import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Role;
 import basketballleague.studentsystem.model.User;
+import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.UserRepository;
 import basketballleague.studentsystem.service.AuthenticationService;
 import basketballleague.studentsystem.service.JwtService;
@@ -19,16 +20,25 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
+    private final PlayerRepository playerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     @Override
-    public JwtAuthenticationResponse signup(SignUpRequest request) {
+    public JwtAuthenticationResponse signup(User request) {
         var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
-                .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER).build();
+                .email(request.getEmail()).height(request.getHeight()).password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole()).build();
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
+
+        Player player = new Player();
+        player.setUser(user);
+        player.setHeight(user.getHeight());
+        player.setLastName(user.getLastName());
+        player.setFirstName(user.getFirstName());
+        playerRepository.save(player);
+
         return JwtAuthenticationResponse.builder().token(jwt).build();
     }
 

@@ -1,50 +1,38 @@
 package basketballleague.studentsystem.controller;
 
 import basketballleague.studentsystem.model.Game;
+import basketballleague.studentsystem.repository.GameRepository;
 import basketballleague.studentsystem.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/games")
 public class GameController {
+    @Autowired
     private final GameService gameService;
 
     @Autowired
-    public GameController(GameService gameService) {
+    private final GameRepository gameRepository;
+    public GameController(GameService gameService, GameRepository gameRepository) {
         this.gameService = gameService;
+        this.gameRepository = gameRepository;
     }
 
-    @PostMapping("/add")
-    public Game addGame(@RequestBody Game game) {
-        return gameService.addGame(game);
+    @PostMapping("/create")
+    public Game createGame(@RequestParam String teamAname, @RequestParam String teamBname,
+                           @RequestParam String location
+                           ) {
+        return gameService.createGame(teamAname, teamBname, location);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public void deleteGame(@PathVariable int id) {
-        gameService.deleteGame(id);
+    @PostMapping("/simulate/{id}")
+    public void simulateGame(@PathVariable int id) {
+        Game game = gameRepository.findById(id).orElseThrow(() -> new RuntimeException("Game not found"));
+        gameService.simulateGame(game);
     }
-    @DeleteMapping("/delete/all")
-    public void deleteAll() {
-        gameService.deleteAll();
-    }
-
-    @GetMapping("/get/{id}")
-    public Optional<Game> getGameById(@PathVariable int id) {
-        return gameService.getGame(id);
-    }
-
-    @GetMapping("/all")
-    public List<Game> getAllGames() {
-        return gameService.getAllGames();
-    }
-
-    @PutMapping("/update")
-    public Game updateGame(@RequestBody Game game) {
-        return gameService.updateGame(game);
-    }
-
 }

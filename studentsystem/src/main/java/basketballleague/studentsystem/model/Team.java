@@ -1,6 +1,7 @@
 package basketballleague.studentsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -32,6 +33,11 @@ public class Team {
         }
         playerList.add(player);
         player.setTeam(this);
+    }
+
+    public void removePlayer(Player player) {
+        this.playerList.remove(player);
+        player.setTeam(null);
     }
 
 }

@@ -16,10 +16,18 @@ public class UserServiceImpl implements UserService {
     public UserDetailsService userDetailsService() {
         return new UserDetailsService() {
             @Override
-            public UserDetails loadUserByUsername(String username) {
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 return userRepository.findByEmail(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
             }
         };
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
+    }
+
+
 }

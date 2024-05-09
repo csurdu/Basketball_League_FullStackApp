@@ -34,7 +34,6 @@ public class TeamServiceImpl implements TeamService {
         dto.setTotalRebounds(team.getPlayerList().stream().mapToInt(Player::getReboundsPerGame).sum());
         dto.setTotalAssists(team.getPlayerList().stream().mapToInt(Player::getAssistsPerGame).sum());
         dto.setTotalSteals(team.getPlayerList().stream().mapToInt(Player::getStealsPerGame).sum());
-        // ... și alte statistici pe care vrei să le adaugi
         return dto;
     }
     @Override
@@ -117,9 +116,9 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void deleteTeam(int teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found for ID: " + teamId));
+    public void deleteTeam(String teamName) {
+        Team team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found for ID: " + teamName));
 
         // Find all players belonging to the team
         Set<Player> players = team.getPlayerList();

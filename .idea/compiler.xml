@@ -11,12 +11,12 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="studentsystem" target="17" />
+      <module name="studentsystem" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="studentsystem" options="-parameters" />
+      <module name="studentsystem" options="" />
     </option>
   </component>
 </project>
