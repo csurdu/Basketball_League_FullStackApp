@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection as it's not needed for stateless APIs
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS and configure source
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ws/**").permitAll()  // Permite accesul la WebSocket
                         .requestMatchers("/api/v1/auth/**").permitAll() // Public endpoints
                         .requestMatchers("/api/player/createAndJoinTeam/**").hasAuthority(Role.CAPTAIN.name()) // Restricted endpoint
                         .anyRequest().authenticated()) // All other requests need to be authenticated
@@ -53,10 +54,10 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*")); // Use pattern to allow all subdomains/ports on localhost
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000")); // Use pattern to allow all subdomains/ports on localhost
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "HEAD", "OPTIONS", "PUT", "PATCH", "DELETE"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
-
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

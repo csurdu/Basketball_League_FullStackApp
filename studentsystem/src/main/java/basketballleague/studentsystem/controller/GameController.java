@@ -26,7 +26,7 @@ public class GameController {
     @PostMapping("/create")
     public Game createGame(@RequestParam String teamAname, @RequestParam String teamBname,
                            @RequestParam String location
-                           ) {
+    ) {
         return gameService.createGame(teamAname, teamBname, location);
     }
 

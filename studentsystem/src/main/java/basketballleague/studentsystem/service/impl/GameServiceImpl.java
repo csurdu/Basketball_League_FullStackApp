@@ -1,8 +1,10 @@
 package basketballleague.studentsystem.service.impl;
 
 import basketballleague.studentsystem.model.Game;
+import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Team;
 import basketballleague.studentsystem.repository.GameRepository;
+import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.TeamRepository;
 import basketballleague.studentsystem.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -20,6 +23,9 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private PlayerRepository playerRepository; // Assuming you have a repository to fetch players
+
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -45,31 +51,50 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
 
-        // Simulating the game dynamics over a period (e.g., each second)
         int totalUpdates = 10; // number of updates during the game
         for (int i = 0; i < totalUpdates; i++) {
+            // Select a random player from each team
+            Player playerA = getRandomPlayer(game.getTeamA());
+            Player playerB = getRandomPlayer(game.getTeamB());
+
             // Simulate score changes
             int scoreChangeA = random.nextInt(3);  // 0, 1, or 2 points
             int scoreChangeB = random.nextInt(3);
+
             game.setScoreTeamA(game.getScoreTeamA() + scoreChangeA);
             game.setScoreTeamB(game.getScoreTeamB() + scoreChangeB);
 
-            // Artificial delay to mimic real-time updates
+            // Update player scores
+            updatePlayerScore(playerA, scoreChangeA);
+            messagingTemplate.convertAndSend("/topic/playerUpdate/" + playerA.getId(), playerA);
+
+            updatePlayerScore(playerB, scoreChangeB);
+            messagingTemplate.convertAndSend("/topic/playerUpdate/" + playerB.getId(), playerB);
+
             try {
                 Thread.sleep(1000); // Sleep for 1 second
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
 
-            // Update game state in the repository and notify clients
             gameRepository.save(game);
             messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
         }
 
-        // After finishing the simulation
         game.setStatus(Game.GameStatus.FINISHED);
         gameRepository.save(game);
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
+    }
+
+
+    private Player getRandomPlayer(Team team) {
+        List<Player> players = playerRepository.findByTeam(team);
+        return players.get(random.nextInt(players.size()));
+    }
+
+    private void updatePlayerScore(Player player, int scoreChange) {
+        player.setInGamePoints(player.getInGamePoints() + scoreChange);
+        playerRepository.save(player);
     }
 
 

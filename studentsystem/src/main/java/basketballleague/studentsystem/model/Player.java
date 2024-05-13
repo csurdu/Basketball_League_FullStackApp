@@ -32,7 +32,7 @@ public class Player {
     @JoinColumn(name = "user_id") // This is the column in the 'player' table that references 'id' in the '_user' table
     private User user;
     private String height;
-
+    private int inGamePoints;
     private int pointsPerGame;
     private int reboundsPerGame;
     private int stealsPerGame;

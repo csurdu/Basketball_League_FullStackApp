@@ -13,4 +13,3 @@ public interface GameService {
 
     public Game createGame(String teamAname, String teamBname, String location);
 }
-
