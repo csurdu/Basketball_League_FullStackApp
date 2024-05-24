@@ -8,7 +8,7 @@ import java.util.List;
 public interface TeamService {
 
     Team addTeam(Team team);
-    void deleteTeam(int teamId);
+    void deleteTeam(String teamName);
     Team getTeam(int teamId);
     Team getTeambyName(String name);
     List<Team> getAllTeams();

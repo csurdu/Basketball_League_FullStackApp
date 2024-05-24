@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Data
@@ -14,22 +16,22 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team1_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
-    private Team homeTeam;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_a_id")
+    private Team teamA;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team2_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
-    private Team awayTeam;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_b_id")
+    private Team teamB;
 
-    private String date;
-    private int hour;
+    private int scoreTeamA;
+    private int scoreTeamB;
+    private LocalDateTime date;
+    private String location;
+    private GameStatus status;
 
-    private int homeTeamScore;
-    private int awayTeamScore;
-
-
+    public enum GameStatus {
+        SCHEDULED, IN_PROGRESS, FINISHED
+    }
 
 }
