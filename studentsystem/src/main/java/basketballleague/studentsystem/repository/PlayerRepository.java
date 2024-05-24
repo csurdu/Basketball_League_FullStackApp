@@ -12,6 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player,Integer> {
+    Optional<Player> findByFirstNameAndLastName(String firstName, String lastName);
+    List<Player> findByTeamIsNull();
+    List<Player> findByTeamIsNotNull();
     List<Player> findByOrderByPointsPerGameAsc();
 
     // Similarly for rebounds, steals, and assists

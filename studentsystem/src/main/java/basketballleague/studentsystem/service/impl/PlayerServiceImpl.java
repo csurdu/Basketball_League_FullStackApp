@@ -14,10 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +57,10 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(() -> new EntityNotFoundException("Player not found for ID: " + id));
         return convertToPlayerDTO(player);
     }
-
+    @Override
+    public Optional<Player> getPlayerByFirstNameAndLastName(String firstName, String lastName) {
+        return playerRepository.findByFirstNameAndLastName(firstName, lastName);
+    }
     @Override
     public List<PlayerDTO> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
@@ -105,7 +105,13 @@ public class PlayerServiceImpl implements PlayerService {
     public Player updatePlayer(Player player) {
         return playerRepository.save(player);
     }
+    public List<Player> getPlayersWithoutTeam() {
+        return playerRepository.findByTeamIsNull();
+    }
 
+    public List<Player> getPlayersWithTeam() {
+        return playerRepository.findByTeamIsNotNull();
+    }
     @Override
     public List<PlayerDTO> findByOrderByPointsPerGameAsc() {
         return playerRepository.findByOrderByPointsPerGameAsc()
@@ -151,7 +157,7 @@ public class PlayerServiceImpl implements PlayerService {
     public List<PlayerDTO> findByOrderByReboundsPerGameDsc() {
         return playerRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparingInt(Player::getReboundsPerGame).reversed()) // Descending order
+                .sorted(Comparator.comparingDouble(Player::getReboundsPerGame).reversed()) // Descending order
                 .map(this::convertToPlayerDTO)
                 .collect(Collectors.toList());
     }
@@ -160,7 +166,7 @@ public class PlayerServiceImpl implements PlayerService {
     public List<PlayerDTO> findByOrderByStealsPerGameDsc() {
         return playerRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparingInt(Player::getStealsPerGame).reversed()) // Descending order
+                .sorted(Comparator.comparingDouble(Player::getStealsPerGame).reversed()) // Descending order
                 .map(this::convertToPlayerDTO)
                 .collect(Collectors.toList());
     }
@@ -169,7 +175,7 @@ public class PlayerServiceImpl implements PlayerService {
     public List<PlayerDTO> findByOrderByAssistsPerGameDsc() {
         return playerRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparingInt(Player::getAssistsPerGame).reversed()) // Descending order
+                .sorted(Comparator.comparingDouble(Player::getAssistsPerGame).reversed()) // Descending order
                 .map(this::convertToPlayerDTO)
                 .collect(Collectors.toList());
     }

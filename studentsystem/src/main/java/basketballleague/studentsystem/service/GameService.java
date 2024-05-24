@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface GameService {
     void simulateGame(Game game);
 
-    public Game createGame(String teamAname, String teamBname, String location);
-}
+    public Game createGame(String teamAname, String teamBname, String location,LocalDateTime date);
+    public List<Game> getFinishedGames();
+
+    }

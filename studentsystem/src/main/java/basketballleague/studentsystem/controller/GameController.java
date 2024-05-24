@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
@@ -25,14 +26,18 @@ public class GameController {
 
     @PostMapping("/create")
     public Game createGame(@RequestParam String teamAname, @RequestParam String teamBname,
-                           @RequestParam String location
+                           @RequestParam String location,@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date
     ) {
-        return gameService.createGame(teamAname, teamBname, location);
+        return gameService.createGame(teamAname, teamBname, location,date);
     }
 
     @PostMapping("/simulate/{id}")
     public void simulateGame(@PathVariable int id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new RuntimeException("Game not found"));
         gameService.simulateGame(game);
+    }
+    @GetMapping("/history")
+    public List<Game> getFinishedGames() {
+        return gameService.getFinishedGames();
     }
 }

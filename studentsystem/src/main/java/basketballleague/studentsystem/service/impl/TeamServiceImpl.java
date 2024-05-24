@@ -30,10 +30,11 @@ public class TeamServiceImpl implements TeamService {
         TeamDTO dto = new TeamDTO();
         dto.setId(team.getId());
         dto.setName(team.getName());
-        dto.setTotalPoints(team.getPlayerList().stream().mapToInt(Player::getPointsPerGame).sum());
-        dto.setTotalRebounds(team.getPlayerList().stream().mapToInt(Player::getReboundsPerGame).sum());
-        dto.setTotalAssists(team.getPlayerList().stream().mapToInt(Player::getAssistsPerGame).sum());
-        dto.setTotalSteals(team.getPlayerList().stream().mapToInt(Player::getStealsPerGame).sum());
+        dto.setTotalPoints((int) team.getPlayerList().stream().mapToDouble(Player::getPointsPerGame).sum());
+        dto.setTotalRebounds((float) team.getPlayerList().stream().mapToDouble(Player::getReboundsPerGame).sum());
+        dto.setTotalAssists((float) team.getPlayerList().stream().mapToDouble(Player::getAssistsPerGame).sum());
+        dto.setTotalSteals((float) team.getPlayerList().stream().mapToDouble(Player::getStealsPerGame).sum());
+
         return dto;
     }
     @Override

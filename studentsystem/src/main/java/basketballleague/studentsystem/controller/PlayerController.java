@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin("*")
 @RestController
@@ -48,7 +49,11 @@ private final PlayerRepository playerRepository;
     public PlayerDTO getPlayer(@PathVariable int playerId) {
         return playerService.getPlayer(playerId);
     }
-
+    @GetMapping("/name")
+    public Player getPlayerByFirstAndLastName(@RequestParam String firstName, @RequestParam String lastName) {
+        Optional<Player> player = playerService.getPlayerByFirstNameAndLastName(firstName, lastName);
+        return player.orElse(null); // Handle the case where no player is found
+    }
     @PostMapping("/add")
     public Player savePlayer(@RequestBody Player player) {
         return playerService.addPlayer(player);
@@ -74,6 +79,16 @@ private final PlayerRepository playerRepository;
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers();
+    }
+
+    @GetMapping("/without-team")
+    public List<Player> getPlayersWithoutTeam() {
+        return playerService.getPlayersWithoutTeam();
+    }
+
+    @GetMapping("/with-team")
+    public List<Player> getPlayersWithTeam() {
+        return playerService.getPlayersWithTeam();
     }
     @GetMapping("/points/ascending")
     public List<PlayerDTO> findPlayersSortedByPoints() {

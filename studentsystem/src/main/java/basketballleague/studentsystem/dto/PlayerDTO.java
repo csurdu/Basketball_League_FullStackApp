@@ -13,8 +13,8 @@ public class PlayerDTO {
     private String lastName;
     private String height;
     private int pointsPerGame;
-    private int reboundsPerGame;
-    private int stealsPerGame;
-    private int assistsPerGame;
+    private float reboundsPerGame;
+    private float stealsPerGame;
+    private float assistsPerGame;
     private String teamName;
 }
