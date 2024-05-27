@@ -27,11 +27,13 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Player player;
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String profilePicture; // Path to profile picture
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

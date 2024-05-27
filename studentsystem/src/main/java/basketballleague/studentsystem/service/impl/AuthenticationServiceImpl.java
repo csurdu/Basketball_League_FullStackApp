@@ -26,9 +26,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     @Override
     public JwtAuthenticationResponse signup(User request) {
-        var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
-                .email(request.getEmail()).height(request.getHeight()).password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole()).build();
+        var user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .height(request.getHeight())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole())
+                .profilePicture(request.getProfilePicture()) // Set profile picture path
+                .build();
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
 
@@ -37,6 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         player.setHeight(user.getHeight());
         player.setLastName(user.getLastName());
         player.setFirstName(user.getFirstName());
+        player.setProfilePicture(user.getProfilePicture()); // Set profile picture path
         playerRepository.save(player);
 
         return JwtAuthenticationResponse.builder().token(jwt).build();

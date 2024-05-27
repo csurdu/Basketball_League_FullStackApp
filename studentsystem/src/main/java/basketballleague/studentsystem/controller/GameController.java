@@ -1,10 +1,13 @@
 package basketballleague.studentsystem.controller;
 
+import basketballleague.studentsystem.dto.GameDTO;
+import basketballleague.studentsystem.dto.GameDetailsDTO;
 import basketballleague.studentsystem.model.Game;
 import basketballleague.studentsystem.repository.GameRepository;
 import basketballleague.studentsystem.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -36,8 +39,13 @@ public class GameController {
         Game game = gameRepository.findById(id).orElseThrow(() -> new RuntimeException("Game not found"));
         gameService.simulateGame(game);
     }
+    @GetMapping("/{gameId}")
+    public ResponseEntity<GameDetailsDTO> getGameDetails(@PathVariable int gameId) {
+        GameDetailsDTO gameDetails = gameService.getGameDetails(gameId);
+        return ResponseEntity.ok(gameDetails);
+    }
     @GetMapping("/history")
-    public List<Game> getFinishedGames() {
+    public List<GameDTO> getFinishedGames() {
         return gameService.getFinishedGames();
     }
 }

@@ -27,7 +27,7 @@ public class Player {
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "user_id") // This is the column in the 'player' table that references 'id' in the '_user' table
     private User user;
@@ -55,6 +55,8 @@ public class Player {
     private float onePointPercentage; // Percentage for 1-point shots
     private float twoPointPercentage; // Percentage for 2-point shots
     private float threePointPercentage; // Percentage for 3-point shots
+    private String profilePicture; // Path to profile picture
+
 
     private boolean isCaptain;
 

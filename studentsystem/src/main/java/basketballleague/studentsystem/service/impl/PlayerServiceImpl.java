@@ -105,12 +105,19 @@ public class PlayerServiceImpl implements PlayerService {
     public Player updatePlayer(Player player) {
         return playerRepository.save(player);
     }
-    public List<Player> getPlayersWithoutTeam() {
-        return playerRepository.findByTeamIsNull();
+//    @Override
+//    public List<PlayerDTO> getAllPlayers() {
+//        List<Player> players = playerRepository.findAll();
+//        return players.stream().map(this::convertToPlayerDTO).collect(Collectors.toList());
+//    }
+    public List<PlayerDTO> getPlayersWithoutTeam() {
+        List<Player> players = playerRepository.findByTeamIsNull();
+        return players.stream().map(this::convertToPlayerDTO).collect(Collectors.toList());
     }
 
-    public List<Player> getPlayersWithTeam() {
-        return playerRepository.findByTeamIsNotNull();
+    public List<PlayerDTO> getPlayersWithTeam() {
+        List<Player> players = playerRepository.findByTeamIsNotNull();
+        return players.stream().map(this::convertToPlayerDTO).collect(Collectors.toList());
     }
     @Override
     public List<PlayerDTO> findByOrderByPointsPerGameAsc() {

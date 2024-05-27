@@ -24,7 +24,7 @@ public class Team {
     private String name;
 
     private int year;
-    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
     private Set<Player> playerList;
 
     public void addPlayer(Player player) {

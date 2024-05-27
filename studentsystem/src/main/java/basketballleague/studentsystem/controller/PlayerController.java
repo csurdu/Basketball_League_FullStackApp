@@ -82,12 +82,12 @@ private final PlayerRepository playerRepository;
     }
 
     @GetMapping("/without-team")
-    public List<Player> getPlayersWithoutTeam() {
+    public List<PlayerDTO> getPlayersWithoutTeam() {
         return playerService.getPlayersWithoutTeam();
     }
 
     @GetMapping("/with-team")
-    public List<Player> getPlayersWithTeam() {
+    public List<PlayerDTO> getPlayersWithTeam() {
         return playerService.getPlayersWithTeam();
     }
     @GetMapping("/points/ascending")

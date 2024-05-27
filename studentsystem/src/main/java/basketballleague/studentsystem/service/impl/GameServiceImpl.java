@@ -1,8 +1,11 @@
 package basketballleague.studentsystem.service.impl;
 
+import basketballleague.studentsystem.dto.*;
 import basketballleague.studentsystem.model.Game;
+import basketballleague.studentsystem.model.GameEvent;
 import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Team;
+import basketballleague.studentsystem.repository.GameEventRespository;
 import basketballleague.studentsystem.repository.GameRepository;
 import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.TeamRepository;
@@ -12,9 +15,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -25,7 +30,10 @@ public class GameServiceImpl implements GameService {
     @Autowired
     private TeamRepository teamRepository;
     @Autowired
-    private PlayerRepository playerRepository; // Assuming you have a repository to fetch players
+    private PlayerRepository playerRepository;
+
+    @Autowired
+    private GameEventRespository gameEventRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -87,6 +95,20 @@ public class GameServiceImpl implements GameService {
             updatePlayerInGameStats(playerB, scoreChangeB, pointsTypeB, attemptsChangeB, reboundsChangeB, stealsChangeB, assistsChangeB);
             messagingTemplate.convertAndSend("/topic/playerUpdate/" + playerB.getId(), playerB);
 
+            // Save game event
+            GameEvent eventA = new GameEvent();
+            eventA.setGame(game);
+            eventA.setEventType("SCORE");
+            eventA.setDescription(playerA.getFirstName() + " scored " + scoreChangeA + " points.");
+            eventA.setTimestamp(LocalDateTime.now());
+            gameEventRepository.save(eventA);
+
+            GameEvent eventB = new GameEvent();
+            eventB.setGame(game);
+            eventB.setEventType("SCORE");
+            eventB.setDescription(playerB.getFirstName() + " scored " + scoreChangeB + " points.");
+            eventB.setTimestamp(LocalDateTime.now());
+            gameEventRepository.save(eventB);
             try {
                 Thread.sleep(1000); // Sleep for 1 second
             } catch (InterruptedException e) {
@@ -106,20 +128,69 @@ public class GameServiceImpl implements GameService {
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
     }
 
-    private void updatePlayerStatsAfterGame(Set<Player> players) {
-        players.forEach(player -> {
-            player.updateGamesPlayed();
-            updatePointsPerGame(player);
-            updateReboundsPerGame(player);
-            updateStealsPerGame(player);
-            updateAssistsPerGame(player);
-            updateScoringPercentages(player);
-        });
+    @Override
+    public GameDetailsDTO getGameDetails(int gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        return convertToGameDetailsDTO(game);
     }
 
-    private Player getRandomPlayer(Team team) {
-        List<Player> players = playerRepository.findByTeam(team);
-        return players.get(random.nextInt(players.size()));
+    private GameDetailsDTO convertToGameDetailsDTO(Game game) {
+        GameDetailsDTO gameDetailsDTO = new GameDetailsDTO();
+
+        gameDetailsDTO.setId(game.getId());
+        gameDetailsDTO.setDate(game.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        gameDetailsDTO.setLocation(game.getLocation());
+        gameDetailsDTO.setStatus(game.getStatus().name());
+
+        gameDetailsDTO.setTeamA(convertToTeamDTO(game.getTeamA()));
+        gameDetailsDTO.setTeamB(convertToTeamDTO(game.getTeamB()));
+
+        gameDetailsDTO.setScoreTeamA(game.getScoreTeamA());
+        gameDetailsDTO.setScoreTeamB(game.getScoreTeamB());
+
+        List<PlayerStatsDTO> teamAPlayerStats = game.getTeamA().getPlayerList().stream()
+                .map(this::convertToPlayerStatsDTO)
+                .collect(Collectors.toList());
+        List<PlayerStatsDTO> teamBPlayerStats = game.getTeamB().getPlayerList().stream()
+                .map(this::convertToPlayerStatsDTO)
+                .collect(Collectors.toList());
+
+        gameDetailsDTO.setTeamAPlayerStats(teamAPlayerStats);
+        gameDetailsDTO.setTeamBPlayerStats(teamBPlayerStats);
+
+        // Fetch game events and convert to DTOs
+        List<GameEventDTO> eventDTOs = gameEventRepository.findByGameOrderByTimestampAsc(game).stream()
+                .map(this::convertToGameEventDTO)
+                .collect(Collectors.toList());
+        gameDetailsDTO.setEvents(eventDTOs);
+
+        return gameDetailsDTO;
+    }
+
+    private PlayerStatsDTO convertToPlayerStatsDTO(Player player) {
+        PlayerStatsDTO playerStatsDTO = new PlayerStatsDTO();
+        playerStatsDTO.setPlayerId((long) player.getId());
+        playerStatsDTO.setName(player.getFirstName());
+        playerStatsDTO.setPoints(player.getInGamePoints());
+        playerStatsDTO.setOnePointAttempts(player.getInGame1PointAttempts());
+        playerStatsDTO.setOnePointMade(player.getInGame1PointMade());
+        playerStatsDTO.setTwoPointAttempts(player.getInGame2PointAttempts());
+        playerStatsDTO.setTwoPointMade(player.getInGame2PointMade());
+        playerStatsDTO.setThreePointAttempts(player.getInGame3PointAttempts());
+        playerStatsDTO.setThreePointMade(player.getInGame3PointMade());
+        playerStatsDTO.setRebounds(player.getInGameRebounds());
+        playerStatsDTO.setSteals(player.getInGameSteals());
+        playerStatsDTO.setAssists(player.getInGameAssists());
+        return playerStatsDTO;
+    }
+
+    private GameEventDTO convertToGameEventDTO(GameEvent event) {
+        GameEventDTO eventDTO = new GameEventDTO();
+        eventDTO.setId(event.getId());
+        eventDTO.setEventType(event.getEventType());
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setTimestamp(event.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return eventDTO;
     }
 
     private void updatePlayerInGameStats(Player player, int scoreChange, int pointsType, int attemptsChange, int reboundsChange, int stealsChange, int assistsChange) {
@@ -171,6 +242,22 @@ public class GameServiceImpl implements GameService {
         });
     }
 
+    private void updatePlayerStatsAfterGame(Set<Player> players) {
+        players.forEach(player -> {
+            player.updateGamesPlayed();
+            updatePointsPerGame(player);
+            updateReboundsPerGame(player);
+            updateStealsPerGame(player);
+            updateAssistsPerGame(player);
+            updateScoringPercentages(player);
+        });
+    }
+
+    private Player getRandomPlayer(Team team) {
+        List<Player> players = playerRepository.findByTeam(team);
+        return players.get(random.nextInt(players.size()));
+    }
+
     private void updatePointsPerGame(Player player) {
         player.setPointsPerGame((player.getPointsPerGame() * (player.getGamesPlayed() - 1) + player.getInGamePoints()) / player.getGamesPlayed());
         playerRepository.save(player);
@@ -200,7 +287,48 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> getFinishedGames() {
-        return gameRepository.findByStatus(Game.GameStatus.FINISHED);
+    public List<GameDTO> getFinishedGames() {
+        // Fetch all games with status FINISHED
+        List<Game> finishedGames = gameRepository.findByStatus(Game.GameStatus.FINISHED);
+
+        // Map each game to its corresponding GameDTO
+        return finishedGames.stream().map(this::convertToGameDTO).collect(Collectors.toList());
+    }
+
+    private GameDTO convertToGameDTO(Game game) {
+        GameDTO gameDTO = new GameDTO();
+
+        // Get team names
+        Team teamA = teamRepository.findById(game.getTeamA().getId()).orElse(null);
+        Team teamB = teamRepository.findById(game.getTeamB().getId()).orElse(null);
+
+        if (teamA != null) {
+            gameDTO.setTeam1Name(teamA.getName());
+            gameDTO.setId(game.getTeamA().getId());
+        }
+        if (teamB != null) {
+            gameDTO.setTeam2Name(teamB.getName());
+            gameDTO.setId(game.getTeamB().getId());
+
+        }
+
+        // Format date and hour
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        gameDTO.setDate(game.getDate().format(dateFormatter));
+        gameDTO.setHour(game.getDate().getHour());
+
+        // Set combined score or individual scores as needed
+        gameDTO.setScoreA(game.getScoreTeamA());
+        gameDTO.setScoreB(game.getScoreTeamB());
+
+        return gameDTO;
+    }
+
+    private TeamDTO convertToTeamDTO(Team team) {
+        if (team == null) return null;
+        TeamDTO teamDTO = new TeamDTO();
+        teamDTO.setId(team.getId());
+        teamDTO.setName(team.getName());
+        return teamDTO;
     }
 }

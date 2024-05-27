@@ -15,6 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @CrossOrigin("*")
 @RestController
@@ -26,21 +33,49 @@ public class AuthenticationController {
     private final PlayerRepository playerRepository;
 
     @PostMapping("/signup")
-    public ResponseEntity<JwtAuthenticationResponse> signup(@RequestBody SignUpRequest request) {
+    public ResponseEntity<JwtAuthenticationResponse> signup(@ModelAttribute SignUpRequest request) {
+        String profilePicturePath = saveProfilePicture(request.getProfilePicture());
+
         User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .password(request.getPassword()) // This should be encoded by the service
+                .password(request.getPassword())
                 .height(request.getHeight())
-                .role(request.getRole()) // Ensure role is provided in the request
+                .role(request.getRole())
+                .profilePicture(profilePicturePath) // Set profile picture path
                 .build();
+
         if (request.getRole() == null || (!request.getRole().equals(Role.PLAYER_NORMAL) && !request.getRole().equals(Role.CAPTAIN))) {
             return ResponseEntity.badRequest().body(new JwtAuthenticationResponse("Rol invalid!"));
         }
-        System.out.println("User created successfully with email: " + newUser.getEmail() + " and role: " + newUser.getRole());
 
         return ResponseEntity.ok(authenticationService.signup(newUser));
+    }
+
+    private String saveProfilePicture(MultipartFile profilePicture) {
+        if (profilePicture == null || profilePicture.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+            String newFileName = UUID.randomUUID().toString() + "." + fileExtension;
+            Path filePath = Paths.get("uploads/profile_pictures", newFileName);
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, profilePicture.getBytes());
+            return "uploads/profile_pictures/" + newFileName; // Return relative path
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save profile picture", e);
+        }
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        String[] parts = fileName.split("\\.");
+        return parts.length > 1 ? parts[parts.length - 1] : "";
     }
 
     @PostMapping("/signin")

@@ -29,6 +29,7 @@ public class UserController {
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setPlayer(user.getPlayer());
+        dto.setProfilePicture(user.getProfilePicture());
         return dto;
     }
     @GetMapping("/me")

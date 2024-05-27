@@ -18,10 +18,10 @@ public interface PlayerService {
     List<PlayerDTO> getAllPlayers();
     Player joinTeam(int playerId, String teamName);
     Player updatePlayer(Player player);
-    public List<Player> getPlayersWithoutTeam();
+    public List<PlayerDTO> getPlayersWithoutTeam();
 
 
-    public List<Player> getPlayersWithTeam();
+    public List<PlayerDTO> getPlayersWithTeam();
     List<PlayerDTO> findByOrderByPointsPerGameAsc();
 
     // Similarly for rebounds, steals, and assists
