@@ -1,0 +1,110 @@
+/* FormStyles.css */
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f2f5;
+    font-family: 'Arial', sans-serif;
+}
+
+.form-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+    position: relative;
+}
+
+.form-card img {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+}
+
+.form-card h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.form-card label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-card input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: left; /* Changed from center to left for better UX */
+    position: relative;
+}
+
+.form-card .password-container {
+    position: relative;
+}
+
+.form-card .password-container input {
+    width: calc(100% - 60px); /* Adjusted to leave space for the toggle button */
+    padding-right: 40px; /* Adjust padding to ensure text doesn't overlap with the button */
+}
+
+.form-card .password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.form-card .password-toggle:hover {
+    background-color: #0056b3;
+}
+
+.form-card button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-card button:hover {
+    background-color: #0056b3;
+}
+
+.form-card .error-message {
+    color: red;
+    margin-bottom: 15px;
+}
+
+.form-card .success-message {
+    color: green;
+    margin-bottom: 15px;
+}
+
+.form-card .form-footer {
+    margin-top: 10px;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.form-card .form-footer:hover {
+    text-decoration: underline;
+}
