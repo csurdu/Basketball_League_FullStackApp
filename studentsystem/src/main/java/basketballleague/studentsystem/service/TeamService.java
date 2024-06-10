@@ -22,4 +22,6 @@ public interface TeamService {
     public List<TeamDTO> findAllTeamsSortedByReboundsDsc();
     public List<TeamDTO> findAllTeamsSortedByStealsDsc();
     public List<TeamDTO> findAllTeamsSortedByAssistsDsc();
+    public List<TeamDTO> findAllTeamsGamesLost();
+    public List<TeamDTO> findAllTeamsGamesWon();
 }

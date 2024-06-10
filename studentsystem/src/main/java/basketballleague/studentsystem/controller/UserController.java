@@ -1,6 +1,7 @@
 package basketballleague.studentsystem.controller;
 
 import basketballleague.studentsystem.dto.UserDTO;
+import basketballleague.studentsystem.model.Role;
 import basketballleague.studentsystem.model.User;
 import basketballleague.studentsystem.service.UserService;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,11 @@ public class UserController {
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setPlayer(user.getPlayer());
+        if (user.getRole() == Role.CAPTAIN) {
+            dto.setCaptain(true);
+        }
         dto.setProfilePicture(user.getProfilePicture());
+
         return dto;
     }
     @GetMapping("/me")

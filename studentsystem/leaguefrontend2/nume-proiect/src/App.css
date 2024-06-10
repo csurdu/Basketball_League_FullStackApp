@@ -38,8 +38,9 @@
 }
 .nav-bar {
   display: flex;
-  justify-content: space-around;
-  background-color: #333;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #CC5500; /* Darker orange color */
   padding: 1rem 0;
 }
 
@@ -50,8 +51,6 @@
 }
 
 .nav-item:hover, .active {
-  background-color: #555;
+  background-color: #E67300; /* Slightly lighter shade of orange for hover effect */
   color: white;
 }
-
-/* Restul stilurilor pentru App.css */

@@ -6,7 +6,10 @@ const Invitations = ({ token }) => {
   const [invitations, setInvitations] = useState([]);
   const [teamName, setTeamName] = useState('');
   const [inviteeEmail, setInviteeEmail] = useState('');
-  const [userId, setUserId] = useState(null); // To store user ID
+  const [profile, setProfile] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userTeam, setUserTeam] = useState(''); 
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
 
   useEffect(() => {
     axios.get('http://localhost:8080/user/me', {
@@ -15,7 +18,13 @@ const Invitations = ({ token }) => {
       }
     })
     .then(response => {
-      setUserId(response.data.id); // Assuming user ID is in the response
+      const userProfile = response.data;
+      setUserId(userProfile.id);
+      if (userProfile.player && userProfile.player.team) {
+        setUserTeam(userProfile.player.team.name);
+        setTeamName(userProfile.player.team.name);
+      }
+      setProfile(userProfile);
     })
     .catch(error => console.error("Error loading user data", error));
   }, [token]);
@@ -41,8 +50,6 @@ const Invitations = ({ token }) => {
         }
     })
     .then(response => {
-        // Assuming the backend effectively handles rejecting or marking other invitations as irrelevant
-        // We clear the invitations list, assuming no pending invitations should be shown after accepting one
         setInvitations([]);
         alert('Invitation accepted!');
     })
@@ -73,10 +80,13 @@ const Invitations = ({ token }) => {
     })
     .then(() => {
       alert('Invitation sent successfully to ' + inviteeEmail);
-      setTeamName('');
       setInviteeEmail('');
+      setErrorMessage(''); // Clear any previous error message
     })
-    .catch(error => console.error("Failed to send invitation", error));
+    .catch(error => {
+      console.error("Failed to send invitation", error);
+      setErrorMessage('Failed to send invitation: ' + error.message);
+    });
   };
 
   return (
@@ -97,12 +107,13 @@ const Invitations = ({ token }) => {
       )}
 
       <h3 className="sectionHeader">Send an Invitation</h3>
+      {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error message */}
       <input
         type="text"
         className="inputField"
         value={teamName}
-        onChange={(e) => setTeamName(e.target.value)}
         placeholder="Team Name"
+        readOnly // Make this field read-only since it should auto-populate
       />
       <input
         type="email"

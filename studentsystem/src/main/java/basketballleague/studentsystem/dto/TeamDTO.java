@@ -14,4 +14,6 @@ public class TeamDTO {
     private float totalRebounds;
     private double totalAssists;
     private double totalSteals;
+    private int gamesWon;
+    private int gamesLost;
 }

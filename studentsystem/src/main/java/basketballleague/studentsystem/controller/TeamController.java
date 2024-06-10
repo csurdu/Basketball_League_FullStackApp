@@ -89,6 +89,12 @@ public class TeamController {
     public List<TeamDTO> getAllTeamsSortedByAssistsDsc() {
         return teamService.findAllTeamsSortedByAssistsDsc();
     }
-
-
+    @GetMapping("/games/ascending")
+    public List<TeamDTO> getAllTeamsSortedByGamesWon() {
+        return teamService.findAllTeamsGamesWon();
+    }
+    @GetMapping("/games/descending")
+    public List<TeamDTO> getAllTeamsSortedByGamesLost() {
+        return teamService.findAllTeamsGamesLost();
+    }
 }

@@ -1,21 +1,21 @@
 package basketballleague.studentsystem.controller;
 
 import basketballleague.studentsystem.dto.PlayerDTO;
-import basketballleague.studentsystem.model.Invitation;
-import basketballleague.studentsystem.model.Player;
-import basketballleague.studentsystem.model.Team;
-import basketballleague.studentsystem.model.User;
+import basketballleague.studentsystem.model.*;
 import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.UserRepository;
 import basketballleague.studentsystem.service.PlayerService;
 import basketballleague.studentsystem.service.TeamService;
 import basketballleague.studentsystem.service.UserService;
+import ch.qos.logback.core.joran.spi.ElementSelector;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -160,12 +160,16 @@ private final PlayerRepository playerRepository;
         try {
             User user = userRepository.findById(userId).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
-            logger.info("User found: {}", user.getUsername());
-
-
-
+//            logger.info("User found: {}", user.getUsername());
+//
+//
+//
             logger.info("User Role: {}", user.getRole());
-
+            if (!user.getRole().equals(Role.CAPTAIN)) {
+                logger.error("User with ID {} does not have the required role to create a team", userId);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("You are not authorized to create and join a team");
+            }
             team = teamService.addTeam(team);
             logger.info("Team created: {}", team.getName());
 
@@ -202,6 +206,16 @@ private final PlayerRepository playerRepository;
     public List<Invitation> getPendingInvitations(@PathVariable int userId) {
         return playerService.getPendingInvitations(userId);
     }
+    @GetMapping("/invitations/{userId}/pending/count")
+    public ResponseEntity<Integer> getPendingInvitationsCount(@PathVariable int userId) {
+        try {
+            int count = playerService.getPendingInvitations(userId).size();
+            return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
 
     @PostMapping("/invitations/{invitationId}/accept")
     public ResponseEntity<String> acceptInvitation(@PathVariable int invitationId) {
@@ -225,11 +239,22 @@ private final PlayerRepository playerRepository;
     @PostMapping("/sendInvitation/{playerEmail}/toTeam/{teamName}")
     public ResponseEntity<String> sendInvitation(@PathVariable String playerEmail, @PathVariable String teamName) {
         try {
-            User user = userRepository.findByEmail(playerEmail).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + playerEmail));
-            Team team = teamService.getTeambyName(teamName);
-            Invitation invitation = playerService.sendInvitation(user.getPlayer().getId(), team.getId());
-            return ResponseEntity.ok("Invitation sent successfully to Player ID: " + user.getPlayer().getId() + " for Team ID: " + team.getId());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            User curruser = (User) userService.loadUserByUsername(userEmail);// userEmail este numele de utilizator (email) așa cum este stocat în JWT
+            if (curruser.getRole() == Role.CAPTAIN) {
+             User user = userRepository.findByEmail(playerEmail).orElseThrow(() ->
+                     new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + playerEmail));
+             Team team = teamService.getTeambyName(teamName);
+             Invitation invitation = playerService.sendInvitation(user.getPlayer().getId(), team.getId());
+             return ResponseEntity.ok("Invitation sent successfully to Player ID: " + user.getPlayer().getId() + " for Team ID: " + team.getId());
+
+         }
+            else
+         {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("You are not authorized to send invitations");
+         }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send invitation: " + e.getMessage());
         }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Invitations from './Invitations'; // Ensure the path to this component is correct
-import './UserProfilePage.css';
 
 const UserProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -15,7 +14,6 @@ const UserProfilePage = () => {
       }
     })
     .then(response => {
-      console.log('Profile data:', response.data); // Debugging line
       setProfile(response.data);
     })
     .catch(error => console.error("There was an error fetching user profile!", error));
@@ -46,6 +44,7 @@ const UserProfilePage = () => {
   const player = profile.player || {};
   const profileImageUrl = profile.profilePicture ? `http://localhost:8080/${profile.profilePicture}` : '/profilePicture';
 
+  console.log('Profile data:', profile); // Debugging line
 
   return (
     <div className="userProfile">
@@ -59,7 +58,7 @@ const UserProfilePage = () => {
             <h2>{profile.firstName} {profile.lastName}</h2>
             <p><strong>Team:</strong> {player.team ? player.team.name : 'Free Agent'}</p>
             <p><strong>Height:</strong> {player.height || 'Not specified'}</p>
-            <p><strong>Captain:</strong> {player.isCaptain ? 'Yes' : 'No'}</p>
+            <p><strong>Captain:</strong> {profile.captain ? 'Yes' : 'No'}</p>
             <p><strong>Total Scoring Percentage:</strong> {player.scoringPercentage ? player.scoringPercentage.toFixed(1) + '%' : 'N/A'}</p>
             <p><strong>Games Played:</strong> {player.gamesPlayed || 'N/A'}</p>
           </div>

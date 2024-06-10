@@ -10,15 +10,17 @@ import basketballleague.studentsystem.repository.GameRepository;
 import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.TeamRepository;
 import basketballleague.studentsystem.service.GameService;
+import basketballleague.studentsystem.tournament.Bracket;
+import basketballleague.studentsystem.tournament.Match;
+import basketballleague.studentsystem.tournament.TournamentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,7 +126,15 @@ public class GameServiceImpl implements GameService {
         // Update points per game, rebounds per game, steals per game, assists per game, and scoring percentage
         updatePlayerStatsAfterGame(game.getTeamA().getPlayerList());
         updatePlayerStatsAfterGame(game.getTeamB().getPlayerList());
-
+        if (game.getScoreTeamA() > game.getScoreTeamB()) {
+            game.getTeamA().setGamesWon(game.getTeamA().getGamesWon() + 1);
+            game.getTeamB().setGamesLost(game.getTeamB().getGamesLost() + 1);
+        } else {
+            game.getTeamA().setGamesLost(game.getTeamA().getGamesLost() + 1);
+            game.getTeamB().setGamesWon(game.getTeamB().getGamesWon() + 1);
+        }
+        teamRepository.save(game.getTeamA());
+        teamRepository.save(game.getTeamB());
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
     }
 
@@ -304,14 +314,14 @@ public class GameServiceImpl implements GameService {
 
         if (teamA != null) {
             gameDTO.setTeam1Name(teamA.getName());
-            gameDTO.setId(game.getTeamA().getId());
         }
         if (teamB != null) {
             gameDTO.setTeam2Name(teamB.getName());
-            gameDTO.setId(game.getTeamB().getId());
+
 
         }
-
+        gameDTO.setId(game.getId());
+        gameDTO.setLocation(game.getLocation());
         // Format date and hour
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         gameDTO.setDate(game.getDate().format(dateFormatter));
@@ -331,4 +341,52 @@ public class GameServiceImpl implements GameService {
         teamDTO.setName(team.getName());
         return teamDTO;
     }
+    @Override
+    public void simulateTournament(List<String> teamNames) {
+        if (teamNames.size() != 4) {
+            throw new IllegalArgumentException("Tournament requires exactly 4 teams.");
+        }
+
+        // Fetch teams
+        Team teamA = teamRepository.findByName(teamNames.get(0)).orElseThrow(() -> new IllegalArgumentException("Team A not found"));
+        Team teamB = teamRepository.findByName(teamNames.get(1)).orElseThrow(() -> new IllegalArgumentException("Team B not found"));
+        Team teamC = teamRepository.findByName(teamNames.get(2)).orElseThrow(() -> new IllegalArgumentException("Team C not found"));
+        Team teamD = teamRepository.findByName(teamNames.get(3)).orElseThrow(() -> new IllegalArgumentException("Team D not found"));
+
+        // Create and simulate first two matches
+        Game semiFinal1 = createGame(teamA.getName(), teamB.getName(), "Semi-Final 1", LocalDateTime.now().plusMinutes(1));
+        Game semiFinal2 = createGame(teamC.getName(), teamD.getName(), "Semi-Final 2", LocalDateTime.now().plusMinutes(2));
+
+        simulateGame(semiFinal1);
+        try {
+            Thread.sleep(15000); // Sleep for 15 seconds
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        simulateGame(semiFinal2);
+        try {
+            Thread.sleep(15000); // Sleep for 15 seconds
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Determine winners
+        Team winnerSemiFinal1 = semiFinal1.getScoreTeamA() > semiFinal1.getScoreTeamB() ? semiFinal1.getTeamA() : semiFinal1.getTeamB();
+        Team winnerSemiFinal2 = semiFinal2.getScoreTeamA() > semiFinal2.getScoreTeamB() ? semiFinal2.getTeamA() : semiFinal2.getTeamB();
+
+        // Create and simulate final match
+        Game finalMatch = createGame(winnerSemiFinal1.getName(), winnerSemiFinal2.getName(), "Final", LocalDateTime.now().plusMinutes(3));
+        simulateGame(finalMatch);
+
+
+    }
+    public List<GameDTO> getGamesByStatus(Game.GameStatus status) {
+        List<Game> games = gameRepository.findByStatus(status);
+        return games.stream().map(this::convertToGameDTO).collect(Collectors.toList());
+    }
+
+
+
+
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './TableStyle.css';
 
 function PlayerList() {
@@ -8,6 +9,7 @@ function PlayerList() {
   const [searchFirstName, setSearchFirstName] = useState('');
   const [searchLastName, setSearchLastName] = useState('');
   const [filter, setFilter] = useState('all');
+  const navigate = useNavigate();
 
   const token = localStorage.getItem('jwtToken');
 
@@ -45,6 +47,10 @@ function PlayerList() {
     (player.firstName?.toLowerCase() ?? '').includes(searchFirstName.toLowerCase()) &&
     (player.lastName?.toLowerCase() ?? '').includes(searchLastName.toLowerCase())
   );
+
+  const handleRowClick = (playerId) => {
+    navigate(`/player/${playerId}`);
+  };
 
   return (
     <div className="table-container">
@@ -104,7 +110,7 @@ function PlayerList() {
         </thead>
         <tbody>
           {filteredPlayers.map(player => (
-            <tr key={player.id}>
+            <tr key={player.id} onClick={() => handleRowClick(player.id)} style={{ cursor: 'pointer' }}>
               <td>{player.firstName} {player.lastName}</td>
               <td>{player.height}</td>
               <td>{player.pointsPerGame !== undefined ? player.pointsPerGame.toFixed(1) : 'N/A'}</td>

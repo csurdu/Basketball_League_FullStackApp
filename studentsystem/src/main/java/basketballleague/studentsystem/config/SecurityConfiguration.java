@@ -43,6 +43,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/ws/**").permitAll()  // Permite accesul la WebSocket
                         .requestMatchers("/api/v1/auth/**").permitAll() // Public endpoints
                         .requestMatchers("/api/player/createAndJoinTeam/**").hasAuthority(Role.CAPTAIN.name()) // Restricted endpoint
+                        .requestMatchers("/api/player/sendInvitation/**").hasAuthority(Role.CAPTAIN.name()) // Restrict sending invitations to captains
+
                         .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()) // All other requests need to be authenticated
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) // Use stateless session; no session will be created or used by Spring Security

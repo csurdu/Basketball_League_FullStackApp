@@ -55,6 +55,8 @@ function TeamList() {
           value={sortField}
           onChange={e => setSortField(e.target.value)}
         >
+                  <option value="games">Games</option>
+
           <option value="points">Points</option>
           <option value="rebounds">Rebounds</option>
           <option value="steals">Steals</option>
@@ -82,6 +84,8 @@ function TeamList() {
         <thead>
           <tr>
             <th>Team Name</th>
+            <th>Games Won</th>
+            <th>Games Lost</th>
             <th>Total Points</th>
             <th>Total Rebounds</th>
             <th>Total Steals</th>
@@ -96,6 +100,8 @@ function TeamList() {
                   {team.name}
                 </button>
               </td>
+              <td>{team.gamesWon}</td>
+              <td>{team.gamesLost}</td>
               <td>{team.totalPoints.toFixed(1)}</td>
               <td>{team.totalRebounds.toFixed(1)}</td>
               <td>{team.totalSteals.toFixed(1)}</td>

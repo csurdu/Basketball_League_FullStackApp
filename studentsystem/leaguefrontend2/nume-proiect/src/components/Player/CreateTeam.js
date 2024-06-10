@@ -9,6 +9,7 @@ function CreateTeam() {
     year: new Date().getFullYear()
   });
   const [profile, setProfile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(''); // Stare pentru mesajul de eroare
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -48,16 +49,17 @@ function CreateTeam() {
     try {
       const { data } = await axios.post(`http://localhost:8080/player/createAndJoinTeam/${profile.id}`, team, {
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
         }
-    });
-    
+      });
+
       console.log('Team created:', data);
       navigate('/team');
     } catch (error) {
       console.error('Error creating team:', error);
-      alert(`Error creating team: ${error.response?.data?.message || "Unknown error"}`);
+      // Setează mesajul de eroare din răspunsul API
+      setErrorMessage(error.response?.data || "Unknown error");
     }
   };
 
@@ -89,6 +91,7 @@ function CreateTeam() {
             required
           />
         </div>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} {/* Afișează mesajul de eroare */}
         <button type="submit">Create Team</button>
       </form>
     </div>

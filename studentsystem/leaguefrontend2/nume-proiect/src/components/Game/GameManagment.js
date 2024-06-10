@@ -16,10 +16,11 @@ function GameManagement() {
   });
   const [teamAPlayers, setTeamAPlayers] = useState([]);
   const [teamBPlayers, setTeamBPlayers] = useState([]);
-  const [gameCreated, setGameCreated] = useState(false);
   const [simulationResults, setSimulationResults] = useState([]);
   const [stompClient, setStompClient] = useState(null);
   const [gameHistory, setGameHistory] = useState([]);
+  const [scheduledGames, setScheduledGames] = useState([]);
+  const [selectedGameId, setSelectedGameId] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('jwtToken');
 
@@ -39,8 +40,8 @@ function GameManagement() {
   }, []);
 
   useEffect(() => {
-    if (stompClient && gameDetails.gameId) {
-      const gameSubscription = stompClient.subscribe(`/topic/gameplay/${gameDetails.gameId}`, gameUpdate => {
+    if (stompClient && selectedGameId) {
+      const gameSubscription = stompClient.subscribe(`/topic/gameplay/${selectedGameId}`, gameUpdate => {
         const gameData = JSON.parse(gameUpdate.body);
         console.log("Received game data:", gameData);
 
@@ -49,7 +50,7 @@ function GameManagement() {
           scoreTeamB: gameData.scoreTeamB,
           pointsScored: gameData.pointsScored
         };
-        console.log("New result to be added:", newResult); // Adaugă acest log
+        console.log("New result to be added:", newResult);
 
         setSimulationResults(prevResults => [...prevResults, newResult]);
         setGameDetails(prev => ({
@@ -66,10 +67,11 @@ function GameManagement() {
         gameSubscription.unsubscribe();
       };
     }
-  }, [stompClient, gameDetails.gameId]);
+  }, [stompClient, selectedGameId]);
 
   useEffect(() => {
     fetchGameHistory();
+    fetchScheduledGames();
   }, []);
 
   const fetchGameHistory = () => {
@@ -89,6 +91,26 @@ function GameManagement() {
     .catch(error => {
       console.error("Failed to fetch game history!", error);
       alert('Failed to fetch game history!');
+    });
+  };
+
+  const fetchScheduledGames = () => {
+    const url = `http://localhost:8080/games/scheduled`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Fetched scheduled games:', data);
+      setScheduledGames(data);
+    })
+    .catch(error => {
+      console.error("Failed to fetch scheduled games!", error);
+      alert('Failed to fetch scheduled games!');
     });
   };
 
@@ -113,8 +135,8 @@ function GameManagement() {
     .then(response => response.json())
     .then(data => {
       setGameDetails(prev => ({ ...prev, gameId: data.id }));
-      setGameCreated(true);
       alert('Game created successfully!');
+      fetchScheduledGames(); // Refresh the scheduled games list
     })
     .catch(error => {
       console.error("Failed to create game!", error);
@@ -122,22 +144,25 @@ function GameManagement() {
     });
   };
 
-  const simulateGame = () => {
-    const url = `http://localhost:8080/games/simulate/${gameDetails.gameId}`;
+  const simulateGame = (gameId) => {
+    if (selectedGameId !== gameId) { // Check to prevent duplicate simulations
+      setSelectedGameId(gameId);
+      const url = `http://localhost:8080/games/simulate/${gameId}`;
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    })
-    .then(() => {
-      console.log('Simulation started');
-    })
-    .catch(error => {
-      console.error("Failed to simulate game!", error);
-      alert('Failed to simulate game!');
-    });
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      })
+      .then(() => {
+        console.log('Simulation started');
+      })
+      .catch(error => {
+        console.error("Failed to simulate game!", error);
+        alert('Failed to simulate game!');
+      });
+    }
   };
 
   const handleGameClick = (gameId) => {
@@ -147,8 +172,8 @@ function GameManagement() {
 
   return (
     <div className="game-management-container">
-      {!gameCreated ? (
-        <>
+      <div className="top-container">
+        <div className="create-game-container">
           <h2>Create Game</h2>
           <input
             type="text"
@@ -182,64 +207,95 @@ function GameManagement() {
             className="input-field"
           />
           <button onClick={createGame} className="button">Create Game</button>
-        </>
-      ) : (
-        <>
-          <h2>Simulate Game</h2>
-          <button onClick={simulateGame} className="button">Simulate</button>
-          <div className="stats-results-container">
-            <div className="team-stats">
-              <h4>Team A Player Stats</h4>
-              <ul>
-                {teamAPlayers.map((player, index) => (
-                  <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
-                ))}
-              </ul>
-            </div>
-            <div className="results-container">
-              <h3>Simulation Results</h3>
-              <p>Team A Score: {gameDetails.teamAScore} — Team B Score: {gameDetails.teamBScore}</p>
-              <ul>
-                {simulationResults.map((result, index) => (
-                  <li key={index}>
-                    {result.scoreTeamA} - {result.scoreTeamB} -- Score Change
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="team-stats">
-              <h4>Team B Player Stats</h4>
-              <ul>
-                {teamBPlayers.map((player, index) => (
-                  <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
-                ))}
-              </ul>
+        </div>
+        {selectedGameId && (
+          <div className="simulation-details-container">
+            <h2>Simulation Details</h2>
+            <div className="stats-results-container">
+              <div className="team-stats">
+                <h4>Team A Player Stats</h4>
+                <ul>
+                  {teamAPlayers.map((player, index) => (
+                    <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="results-container">
+                <h3>Simulation Results</h3>
+                <p>Team A Score: {gameDetails.teamAScore} — Team B Score: {gameDetails.teamBScore}</p>
+                <ul>
+                  {simulationResults.map((result, index) => (
+                    <li key={index}>
+                      {result.scoreTeamA} - {result.scoreTeamB} -- Score Change
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="team-stats">
+                <h4>Team B Player Stats</h4>
+                <ul>
+                  {teamBPlayers.map((player, index) => (
+                    <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
-        </>
-      )}
-      <div className="game-history-container">
-        <h2>Game History</h2>
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Team A</th>
-              <th>Team B</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {gameHistory.map((game, index) => (
-              <tr key={index} onClick={() => handleGameClick(game.id)} style={{ cursor: 'pointer' }}>
-                <td>{new Date(game.date).toLocaleString()}</td>
-                <td>{game.team1Name}</td>
-                <td>{game.team2Name}</td>
-                <td>{game.scoreA} - {game.scoreB}</td>
+        )}
+      </div>
+      <div className="bottom-container">
+        <div className="scheduled-games-container">
+          <h2>Scheduled Games</h2>
+          <table className="scheduled-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Team A</th>
+                <th>Team B</th>
+                <th>Location</th>
+                <th>Simulate</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {scheduledGames.map((game, index) => (
+                <tr key={index} style={{ cursor: 'pointer' }}>
+                  <td>{new Date(game.date).toLocaleString()}</td>
+                  <td>{game.team1Name}</td>
+                  <td>{game.team2Name}</td>
+                  <td>{game.location}</td>
+                  <td>
+                    <button onClick={() => simulateGame(game.id)} className="button">Simulate</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="game-history-container">
+          <h2>Game History</h2>
+          <table className="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Team A</th>
+                <th>Team B</th>
+                <th>Score</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameHistory.map((game, index) => (
+                <tr key={index} onClick={() => handleGameClick(game.id)} style={{ cursor: 'pointer' }}>
+                  <td>{new Date(game.date).toLocaleString()}</td>
+                  <td>{game.team1Name}</td>
+                  <td>{game.team2Name}</td>
+                  <td>{game.scoreA} - {game.scoreB}</td>
+                  <td>{game.location}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

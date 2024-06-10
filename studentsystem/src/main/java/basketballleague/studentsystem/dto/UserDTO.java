@@ -17,5 +17,8 @@ public class UserDTO {
 
     private Player player;
 
+    private boolean isCaptain;
+
     private String profilePicture;
+
 }

@@ -16,6 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static org.hibernate.query.sqm.tree.SqmNode.log;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -45,6 +47,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         player.setFirstName(user.getFirstName());
         player.setProfilePicture(user.getProfilePicture()); // Set profile picture path
         playerRepository.save(player);
+
+        if (user.getRole() == Role.CAPTAIN) {
+            player.setCaptain(true);
+        }
 
         return JwtAuthenticationResponse.builder().token(jwt).build();
     }

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
+import './GameDetails.css'; // Import the new CSS file
+import basketballCourtImage from './basketball-court.png'; // Update this path
 
 function GameDetails() {
   const { gameId } = useParams();
@@ -44,6 +46,8 @@ function GameDetails() {
   }, [gameId]);
 
   const fetchGameDetails = () => {
+    console.log("Fetching game details for gameId:", gameId);
+
     const url = `http://localhost:8080/games/${gameId}`;
 
     fetch(url, {
@@ -66,39 +70,40 @@ function GameDetails() {
 
   return (
     <div className="game-details-container">
-      <h2>Game Details</h2>
-      <p>Date: {new Date(gameDetails.date).toLocaleString()}</p>
-      <p>Location: {gameDetails.location}</p>
-      <p>Score: {gameDetails.scoreTeamA} - {gameDetails.scoreTeamB}</p>
-      <div className="player-stats-container">
-        <h4>Team A Player Stats</h4>
-        <ul>
-          {gameDetails.teamAPlayerStats.map((player, index) => (
-            <li key={index}>{player.name}: {player.points} points, {player.rebounds} rebounds, {player.assists} assists, {player.steals} steals</li>
-          ))}
-        </ul>
-        <h4>Team B Player Stats</h4>
-        <ul>
-          {gameDetails.teamBPlayerStats.map((player, index) => (
-            <li key={index}>{player.name}: {player.points} points, {player.rebounds} rebounds, {player.assists} assists, {player.steals} steals</li>
-          ))}
-        </ul>
+      <div className="game-details-header">
+        <h2>Game Details</h2>
       </div>
-      <div className="results-container">
-        <h3>Simulation Results</h3>
-        <ul>
-          {simulationResults.map((result, index) => (
-            <li key={index}>
-              {result.scoreTeamA} - {result.scoreTeamB}: {result.playerName} scored {result.pointsScored} points
-            </li>
-          ))}
-        </ul>
+      <div className="basketball-court">
+        <img src={basketballCourtImage} alt="Basketball Court" />
+        <div className="team-scores">
+          <div className="team-score">{gameDetails.scoreTeamA}</div>
+          <div className="team-score">{gameDetails.scoreTeamB}</div>
+        </div>
       </div>
+      <div className="stats-container">
+        <div className="player-stats">
+          <h4>Team A Player Stats</h4>
+          <ul>
+            {gameDetails.teamAPlayerStats.map((player, index) => (
+              <li key={index}>{player.name}: {player.points} points, {player.rebounds} rebounds, {player.assists} assists, {player.steals} steals</li>
+            ))}
+          </ul>
+        </div>
+        <div className="player-stats">
+          <h4>Team B Player Stats</h4>
+          <ul>
+            {gameDetails.teamBPlayerStats.map((player, index) => (
+              <li key={index}>{player.name}: {player.points} points, {player.rebounds} rebounds, {player.assists} assists, {player.steals} steals</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
       <div className="event-log-container">
         <h3>Game Events</h3>
         <ul>
           {gameDetails.events.map((event, index) => (
-            <li key={index}>{event.timestamp}: {event.description}</li>
+            <li key={index}>Play {index + 1}: {event.description}</li>
           ))}
         </ul>
       </div>

@@ -16,5 +16,6 @@ public class GameDTO {
     private int hour;
     private int scoreA;
     private int scoreB;
+    private String location;
 
 }

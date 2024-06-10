@@ -22,7 +22,8 @@ public class Team {
     private int id;
     @Column(unique = true)
     private String name;
-
+    private int gamesWon;
+    private int gamesLost;
     private int year;
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
     private Set<Player> playerList;

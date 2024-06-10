@@ -1,8 +1,10 @@
 package basketballleague.studentsystem.service.impl;
 
 import basketballleague.studentsystem.dto.TeamDTO;
+import basketballleague.studentsystem.model.Game;
 import basketballleague.studentsystem.model.Player;
 import basketballleague.studentsystem.model.Team;
+import basketballleague.studentsystem.repository.GameRepository;
 import basketballleague.studentsystem.repository.PlayerRepository;
 import basketballleague.studentsystem.repository.TeamRepository;
 import basketballleague.studentsystem.service.TeamService;
@@ -21,10 +23,13 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private PlayerRepository playerRepository;
 
+    private GameRepository gameRepository;
+
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository,PlayerRepository playerRepository) {
+    public TeamServiceImpl(TeamRepository teamRepository,PlayerRepository playerRepository,GameRepository gameRepository) {
         this.teamRepository = teamRepository;
         this.playerRepository = playerRepository;
+        this.gameRepository = gameRepository;
     }
     private TeamDTO convertToTeamDTO(Team team) {
         TeamDTO dto = new TeamDTO();
@@ -34,6 +39,8 @@ public class TeamServiceImpl implements TeamService {
         dto.setTotalRebounds((float) team.getPlayerList().stream().mapToDouble(Player::getReboundsPerGame).sum());
         dto.setTotalAssists((float) team.getPlayerList().stream().mapToDouble(Player::getAssistsPerGame).sum());
         dto.setTotalSteals((float) team.getPlayerList().stream().mapToDouble(Player::getStealsPerGame).sum());
+        dto.setGamesLost(team.getGamesLost());
+        dto.setGamesWon(team.getGamesWon());
 
         return dto;
     }
@@ -115,11 +122,26 @@ public class TeamServiceImpl implements TeamService {
                 .sorted(Comparator.comparingDouble(TeamDTO::getTotalPoints).reversed())
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<TeamDTO> findAllTeamsGamesWon() {
+        return teamRepository.findAll().stream()
+                .map(this::convertToTeamDTO)
+                .sorted(Comparator.comparingDouble(TeamDTO::getGamesWon).reversed())
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<TeamDTO> findAllTeamsGamesLost() {
+        return teamRepository.findAll().stream()
+                .map(this::convertToTeamDTO)
+                .sorted(Comparator.comparingDouble(TeamDTO::getGamesLost).reversed())
+                .collect(Collectors.toList());
+    }
 
     @Override
+    @Transactional
     public void deleteTeam(String teamName) {
         Team team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found for ID: " + teamName));
+                .orElseThrow(() -> new EntityNotFoundException("Team not found for name: " + teamName));
 
         // Find all players belonging to the team
         Set<Player> players = team.getPlayerList();
@@ -130,10 +152,13 @@ public class TeamServiceImpl implements TeamService {
             playerRepository.save(player); // Save each player with the team set to null
         });
 
+        // Find all games where the team was involved and delete them
+        List<Game> games = gameRepository.findByTeamAOrTeamB(team, team);
+        games.forEach(game -> gameRepository.delete(game)); // Delete each game involving the team
+
         // Delete the team
         teamRepository.delete(team);
     }
-
     @Override
     public Team getTeam(int teamId) {
         return teamRepository.findById(teamId)
