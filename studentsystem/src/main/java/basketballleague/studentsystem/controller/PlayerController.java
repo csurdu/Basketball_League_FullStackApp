@@ -246,7 +246,7 @@ private final PlayerRepository playerRepository;
              User user = userRepository.findByEmail(playerEmail).orElseThrow(() ->
                      new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + playerEmail));
              Team team = teamService.getTeambyName(teamName);
-             Invitation invitation = playerService.sendInvitation(user.getPlayer().getId(), team.getId());
+             Invitation invitation = playerService.sendInvitation(user.getPlayer().getId(), team.getId(),userEmail);
              return ResponseEntity.ok("Invitation sent successfully to Player ID: " + user.getPlayer().getId() + " for Team ID: " + team.getId());
 
          }
@@ -259,6 +259,10 @@ private final PlayerRepository playerRepository;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send invitation: " + e.getMessage());
         }
     }
-
+    @GetMapping("/{userId}/sent-invitations")
+    public ResponseEntity<List<Invitation>> getSentInvitations(@PathVariable int userId) {
+        List<Invitation> invitations = playerService.getInvitationsSentByPlayer(userId);
+        return ResponseEntity.ok(invitations);
+    }
 
 }

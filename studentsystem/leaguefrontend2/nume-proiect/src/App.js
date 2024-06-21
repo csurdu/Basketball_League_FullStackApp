@@ -17,6 +17,7 @@ import UserProfilePage from './components/Player/UserProfilePage';
 import GameManagement from './components/Game/GameManagment';
 import GameDetails from './components/Game/GameDetails';
 import TeamDetails from './components/Team/TeamDetails';
+import ScheduledGamesBar from './components/Game/ScheduledGamesBar'; // Import the new component
 import './App.css';
 
 function NavBar({ onUpdate }) {
@@ -98,6 +99,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
+          <ScheduledGamesBar /> {/* Add the new component here */}
           <NavBar onUpdate={handleNotificationUpdate} />
           <Routes>
             <Route path="/login" element={<LoginForm />} />

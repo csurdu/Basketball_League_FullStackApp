@@ -1,5 +1,6 @@
 package basketballleague.studentsystem.dto;
 
+import basketballleague.studentsystem.model.User;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +18,11 @@ public class PlayerDTO {
     private float stealsPerGame;
     private float assistsPerGame;
     private String teamName;
+
+    private String email;
+    private int gamesPlayed;
+    private float onePointPercentage;
+    private float twoPointPercentage;
+    private float threePointPercentage;
+    private float scoringPercentage;
 }

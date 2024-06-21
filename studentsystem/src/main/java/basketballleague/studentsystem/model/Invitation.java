@@ -21,6 +21,11 @@ public class Invitation {
     @JoinColumn(name = "player_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Player player;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sender_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Player sender; // Add this field to track the sender
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id")

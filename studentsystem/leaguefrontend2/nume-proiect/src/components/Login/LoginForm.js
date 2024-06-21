@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
-import './FormStyle.css'; // Import the new CSS file
-import loginImage from './TheBasketBallLeague_Logo.jpeg'; // Import your image
+import loginImage from './TheBasketBallLeague_Logo.jpeg'; // Update the path to your image
 
 const LoginForm = ({ onLoginSuccess }) => {
     const { login } = useAuth();
@@ -30,34 +29,35 @@ const LoginForm = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div className="form-container">
-            <div className="form-card">
-                <img src={loginImage} alt="Login" />
-                <h2>Login</h2>
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>Email</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <div className="flex justify-center items-center min-h-screen bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+                <img src={loginImage} alt="Login" className="mx-auto w-24 h-24 rounded-full" />
+                <h2 className="text-2xl font-bold text-center mt-4">Login</h2>
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Email</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
                     </div>
-                    <div className="password-container">
-                        <label>Parolă</label>
+                    <div className="mb-4 relative">
+                        <label className="block text-gray-700">Parolă</label>
                         <input
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded mt-1"
                         />
                         <span
-                            className="password-toggle"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-600"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             {showPassword ? 'Hide' : 'Show'}
                         </span>
                     </div>
-                    {error && <div className="error-message">{error}</div>}
-                    <button type="submit">Login</button>
+                    {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200">Login</button>
                 </form>
-                <div className="form-footer">
-                    <NavLink to="/register">Don't have an account? Sign Up</NavLink>
+                <div className="text-center mt-4">
+                    <NavLink to="/register" className="text-blue-500 hover:underline">Don't have an account? Sign Up</NavLink>
                 </div>
             </div>
         </div>

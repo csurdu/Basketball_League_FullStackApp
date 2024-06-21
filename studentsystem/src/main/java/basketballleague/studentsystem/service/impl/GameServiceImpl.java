@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -47,11 +48,19 @@ public class GameServiceImpl implements GameService {
         Team teamA = teamRepository.findByName(teamAname).orElseThrow(() -> new IllegalArgumentException("Team A not found"));
         Team teamB = teamRepository.findByName(teamBname).orElseThrow(() -> new IllegalArgumentException("Team B not found"));
 
+        LocalDate gameDate = date.toLocalDate();
+
+        boolean gameExists = gameRepository.existsByTeamAAndTeamBAndDateBetween(teamA, teamB, gameDate.atStartOfDay(), gameDate.plusDays(1).atStartOfDay());
+
+        if (gameExists) {
+            throw new IllegalArgumentException("A game between the same teams is already scheduled for the same day.");
+        }
+
         Game game = new Game();
         game.setTeamA(teamA);
         game.setTeamB(teamB);
         game.setLocation(location);
-        game.setDate(date);  // Set the date here
+        game.setDate(date);
         game.setStatus(Game.GameStatus.SCHEDULED);
         return gameRepository.save(game);
     }
@@ -64,53 +73,38 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
 
-        int totalUpdates = 10; // number of updates during the game
-        for (int i = 0; i < totalUpdates; i++) {
-            // Select a random player from each team
-            Player playerA = getRandomPlayer(game.getTeamA());
-            Player playerB = getRandomPlayer(game.getTeamB());
+        long startTime = System.currentTimeMillis();
+        long gameDuration = 10000; // 10 seconds
 
-            // Simulate score changes and attempts
-            int pointsTypeA = random.nextInt(3) + 1; // 1, 2, or 3 points
-            int pointsTypeB = random.nextInt(3) + 1;
+        while (System.currentTimeMillis() - startTime < gameDuration) {
+            boolean updateTeamA = random.nextBoolean();
 
-            int scoreChangeA = pointsTypeA == 1 ? 1 : (pointsTypeA == 2 ? 2 : 3);
-            int scoreChangeB = pointsTypeB == 1 ? 1 : (pointsTypeB == 2 ? 2 : 3);
+            Player player = updateTeamA ? selectScoringPlayer(game.getTeamA()) : selectScoringPlayer(game.getTeamB());
+            int pointsType = random.nextInt(3) + 1; // 1, 2, or 3 points
 
-            int attemptsChangeA = scoreChangeA > 0 ? random.nextInt(2) + 1 : random.nextInt(2); // 0 or 1 if no score, 1 or 2 if scored
-            int attemptsChangeB = scoreChangeB > 0 ? random.nextInt(2) + 1 : random.nextInt(2); // 0 or 1 if no score, 1 or 2 if scored
+            int scoreChange = pointsType == 1 ? 1 : (pointsType == 2 ? 2 : 3);
+            int attemptsChange = scoreChange > 0 ? random.nextInt(2) + 1 : random.nextInt(2); // 0 or 1 if no score, 1 or 2 if scored
 
-            int reboundsChangeA = random.nextInt(2);  // 0 or 1 rebound
-            int reboundsChangeB = random.nextInt(2);  // 0 or 1 rebound
-            int stealsChangeA = random.nextInt(2);  // 0 or 1 steal
-            int stealsChangeB = random.nextInt(2);  // 0 or 1 steal
-            int assistsChangeA = random.nextInt(2);  // 0 or 1 assist
-            int assistsChangeB = random.nextInt(2);  // 0 or 1 assist
+            int reboundsChange = random.nextInt(2);  // 0 or 1 rebound
+            int stealsChange = random.nextInt(2);  // 0 or 1 steal
+            int assistsChange = random.nextInt(2);  // 0 or 1 assist
 
-            game.setScoreTeamA(game.getScoreTeamA() + scoreChangeA);
-            game.setScoreTeamB(game.getScoreTeamB() + scoreChangeB);
+            if (updateTeamA) {
+                game.setScoreTeamA(game.getScoreTeamA() + scoreChange);
+            } else {
+                game.setScoreTeamB(game.getScoreTeamB() + scoreChange);
+            }
 
-            // Update player stats
-            updatePlayerInGameStats(playerA, scoreChangeA, pointsTypeA, attemptsChangeA, reboundsChangeA, stealsChangeA, assistsChangeA);
-            messagingTemplate.convertAndSend("/topic/playerUpdate/" + playerA.getId(), playerA);
+            updatePlayerInGameStats(player, scoreChange, pointsType, attemptsChange, reboundsChange, stealsChange, assistsChange);
+            messagingTemplate.convertAndSend("/topic/playerUpdate/" + player.getId(), player);
 
-            updatePlayerInGameStats(playerB, scoreChangeB, pointsTypeB, attemptsChangeB, reboundsChangeB, stealsChangeB, assistsChangeB);
-            messagingTemplate.convertAndSend("/topic/playerUpdate/" + playerB.getId(), playerB);
+            GameEvent event = new GameEvent();
+            event.setGame(game);
+            event.setEventType("SCORE");
+            event.setDescription(player.getFirstName() + " scored " + scoreChange + " points.");
+            event.setTimestamp(LocalDateTime.now());
+            gameEventRepository.save(event);
 
-            // Save game event
-            GameEvent eventA = new GameEvent();
-            eventA.setGame(game);
-            eventA.setEventType("SCORE");
-            eventA.setDescription(playerA.getFirstName() + " scored " + scoreChangeA + " points.");
-            eventA.setTimestamp(LocalDateTime.now());
-            gameEventRepository.save(eventA);
-
-            GameEvent eventB = new GameEvent();
-            eventB.setGame(game);
-            eventB.setEventType("SCORE");
-            eventB.setDescription(playerB.getFirstName() + " scored " + scoreChangeB + " points.");
-            eventB.setTimestamp(LocalDateTime.now());
-            gameEventRepository.save(eventB);
             try {
                 Thread.sleep(1000); // Sleep for 1 second
             } catch (InterruptedException e) {
@@ -123,7 +117,6 @@ public class GameServiceImpl implements GameService {
 
         game.setStatus(Game.GameStatus.FINISHED);
         gameRepository.save(game);
-        // Update points per game, rebounds per game, steals per game, assists per game, and scoring percentage
         updatePlayerStatsAfterGame(game.getTeamA().getPlayerList());
         updatePlayerStatsAfterGame(game.getTeamB().getPlayerList());
         if (game.getScoreTeamA() > game.getScoreTeamB()) {
@@ -137,6 +130,69 @@ public class GameServiceImpl implements GameService {
         teamRepository.save(game.getTeamB());
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
     }
+
+    private Player selectScoringPlayer(Team team) {
+        List<Player> players = playerRepository.findByTeam(team);
+
+        double totalWeight = players.stream().mapToDouble(this::calculatePlayerWeight).sum();
+        if (totalWeight == 0) {
+            return players.get(random.nextInt(players.size())); // Fallback in case all weights are 0
+        }
+
+        double randomValue = random.nextDouble() * totalWeight;
+        for (Player player : players) {
+            randomValue -= calculatePlayerWeight(player);
+            if (randomValue <= 0) {
+                return player;
+            }
+        }
+        return players.get(players.size() - 1); // Fallback in case of rounding issues
+    }
+
+    private double calculatePlayerWeight(Player player) {
+        double pointsPerGameWeight = player.getPointsPerGame();
+        double onePointPercentage = player.getOnePointPercentage();
+        double twoPointPercentage = player.getTwoPointPercentage();
+        double threePointPercentage = player.getThreePointPercentage();
+
+        double scoringPercentageWeight = 0;
+        int scoringAttempts = 0;
+
+        if (onePointPercentage > 0) {
+            scoringPercentageWeight += onePointPercentage;
+            scoringAttempts++;
+        }
+        if (twoPointPercentage > 0) {
+            scoringPercentageWeight += twoPointPercentage;
+            scoringAttempts++;
+        }
+        if (threePointPercentage > 0) {
+            scoringPercentageWeight += threePointPercentage;
+            scoringAttempts++;
+        }
+
+        if (scoringAttempts > 0) {
+            scoringPercentageWeight /= scoringAttempts;
+        }
+
+        // Avoid players with all stats 0 from having a high weight
+        double baseWeight = 1.0; // Base weight to avoid complete exclusion
+        double experienceFactor = player.getGamesPlayed() > 0 ? 1.0 : 0.1; // Reduce weight if the player has no experience
+
+        double heightFactor = 0;
+        try {
+            heightFactor = Double.parseDouble(player.getHeight()) / 100.0;
+        } catch (NumberFormatException e) {
+            // Handle the case where height is not a valid number
+            heightFactor = 0; // Default to 0 if parsing fails
+        }
+
+        double totalWeight = baseWeight + (pointsPerGameWeight + scoringPercentageWeight + heightFactor) * experienceFactor;
+
+        return totalWeight;
+    }
+
+
 
     @Override
     public GameDetailsDTO getGameDetails(int gameId) {

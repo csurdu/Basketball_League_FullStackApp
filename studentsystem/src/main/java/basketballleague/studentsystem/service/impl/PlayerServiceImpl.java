@@ -96,6 +96,12 @@ public class PlayerServiceImpl implements PlayerService {
         dto.setReboundsPerGame(player.getReboundsPerGame());
         dto.setStealsPerGame(player.getStealsPerGame());
         dto.setAssistsPerGame(player.getAssistsPerGame());
+        dto.setEmail(player.getUser().getEmail());
+        dto.setGamesPlayed(player.getGamesPlayed());
+        dto.setScoringPercentage(player.getScoringPercentage());
+        dto.setOnePointPercentage(player.getOnePointPercentage());
+        dto.setTwoPointPercentage(player.getTwoPointPercentage());
+        dto.setThreePointPercentage(player.getThreePointPercentage());
         if (player.getTeam() != null) {
             dto.setTeamName(player.getTeam().getName());
         }
@@ -236,11 +242,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Invitation sendInvitation(int playerId, int teamId) {
+    public Invitation sendInvitation(int playerId, int teamId,String email) {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Player not found for ID: " + playerId));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found for ID: " + teamId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found for email: " + email));
+
 
         // Check if player is already part of this team or any team
         if (player.getTeam() != null) {
@@ -260,6 +269,7 @@ public class PlayerServiceImpl implements PlayerService {
         invitation.setPlayer(player);
         invitation.setTeam(team);
         invitation.setStatus(InvitationStatus.PENDING);
+        invitation.setSender(user.getPlayer());
         return invitationRepository.save(invitation);
     }
 
@@ -303,6 +313,13 @@ public class PlayerServiceImpl implements PlayerService {
         Invitation invitation = invitationRepository.findById(invitationId).orElseThrow(() -> new RuntimeException("Invitation not found"));
         invitation.setStatus(InvitationStatus.REJECTED);
         invitationRepository.save(invitation);
+    }
+    @Override
+    public List<Invitation> getInvitationsSentByPlayer(int userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+//        return invitationRepository.findByPlayerIdAndStatus(user.getPlayer().getId(), InvitationStatus.PENDING);
+        return invitationRepository.findBySenderId(user.getPlayer().getId());
     }
 
 }

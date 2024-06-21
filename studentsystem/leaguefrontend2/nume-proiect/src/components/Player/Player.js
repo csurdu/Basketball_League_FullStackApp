@@ -1,9 +1,4 @@
-// Player.js
 import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 
 export default function PlayerForm() {
     const [name, setName] = useState('');
@@ -41,29 +36,77 @@ export default function PlayerForm() {
     };
 
     return (
-        <Box
-            component="form"
-            sx={{
-                '& > :not(style)': { m: 1, width: '25ch' },
-            }}
-            noValidate
-            autoComplete="off"
-        >
-            <TextField id="player-name" label="Player Name" variant="outlined" value={name} onChange={(e) => setName(e.target.value)} />
-            <TextField id="team-name" label="Player Team" variant="outlined" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-            <Button variant="contained" onClick={handleClick}>Add Player</Button>
+        <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
+            <h2 className="text-2xl font-bold mb-4 text-gray-700 text-center">Player Form</h2>
+            <form className="space-y-4">
+                <div>
+                    <label htmlFor="player-name" className="block text-gray-700">Player Name</label>
+                    <input 
+                        id="player-name" 
+                        type="text" 
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="team-name" className="block text-gray-700">Player Team</label>
+                    <input 
+                        id="team-name" 
+                        type="text" 
+                        value={teamName} 
+                        onChange={(e) => setTeamName(e.target.value)} 
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <button 
+                    type="button" 
+                    onClick={handleClick} 
+                    className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+                >
+                    Add Player
+                </button>
+            </form>
 
-            <TextField label="Search Player Name" variant="outlined" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
-            <TextField label="Search Player Team" variant="outlined" value={searchTeam} onChange={(e) => setSearchTeam(e.target.value)} />
-            <Button variant="contained" onClick={handleSearch} style={{ marginLeft: '8px' }}>Search Player</Button>
+            <h3 className="text-xl font-bold mt-8 mb-4 text-gray-700 text-center">Search Player</h3>
+            <form className="space-y-4">
+                <div>
+                    <label htmlFor="search-player-name" className="block text-gray-700">Search Player Name</label>
+                    <input 
+                        id="search-player-name" 
+                        type="text" 
+                        value={searchName} 
+                        onChange={(e) => setSearchName(e.target.value)} 
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="search-team-name" className="block text-gray-700">Search Player Team</label>
+                    <input 
+                        id="search-team-name" 
+                        type="text" 
+                        value={searchTeam} 
+                        onChange={(e) => setSearchTeam(e.target.value)} 
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <button 
+                    type="button" 
+                    onClick={handleSearch} 
+                    className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
+                >
+                    Search Player
+                </button>
+            </form>
             
             {playerResult && (
-                <Box sx={{ mt: 2 }}>
-                    <Typography>Player Name: {playerResult.name}</Typography>
-                    <Typography>Team: {playerResult.team?.name}</Typography>
-                    <Typography>Height: {playerResult.height}</Typography>
-                </Box>
+                <div className="mt-8 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h4 className="text-lg font-bold text-gray-700">Player Information</h4>
+                    <p className="text-gray-700">Player Name: {playerResult.name}</p>
+                    <p className="text-gray-700">Team: {playerResult.team?.name}</p>
+                    <p className="text-gray-700">Height: {playerResult.height}</p>
+                </div>
             )}
-        </Box>
+        </div>
     );
 }

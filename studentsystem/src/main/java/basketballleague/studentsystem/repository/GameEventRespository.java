@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface GameEventRespository extends JpaRepository<GameEvent, Integer> {
     List<GameEvent> findByGameOrderByTimestampAsc(Game game);
+    List<GameEvent> findByGame(Game game);
 
 }

@@ -46,7 +46,7 @@ public class AuthenticationController {
                 .profilePicture(profilePicturePath) // Set profile picture path
                 .build();
 
-        if (request.getRole() == null || (!request.getRole().equals(Role.PLAYER_NORMAL) && !request.getRole().equals(Role.CAPTAIN))) {
+        if (request.getRole() == null || (!request.getRole().equals(Role.PLAYER_NORMAL) && !request.getRole().equals(Role.CAPTAIN) && !request.getRole().equals(Role.ADMIN)) ) {
             return ResponseEntity.badRequest().body(new JwtAuthenticationResponse("Rol invalid!"));
         }
 

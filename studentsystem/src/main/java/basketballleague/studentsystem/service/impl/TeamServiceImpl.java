@@ -1,12 +1,8 @@
 package basketballleague.studentsystem.service.impl;
 
 import basketballleague.studentsystem.dto.TeamDTO;
-import basketballleague.studentsystem.model.Game;
-import basketballleague.studentsystem.model.Player;
-import basketballleague.studentsystem.model.Team;
-import basketballleague.studentsystem.repository.GameRepository;
-import basketballleague.studentsystem.repository.PlayerRepository;
-import basketballleague.studentsystem.repository.TeamRepository;
+import basketballleague.studentsystem.model.*;
+import basketballleague.studentsystem.repository.*;
 import basketballleague.studentsystem.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -25,11 +21,18 @@ public class TeamServiceImpl implements TeamService {
 
     private GameRepository gameRepository;
 
+
+    private GameEventRespository gameEventRepository;
+
+    private InvitationRepository invitationRepository;
+
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository,PlayerRepository playerRepository,GameRepository gameRepository) {
+    public TeamServiceImpl(TeamRepository teamRepository,PlayerRepository playerRepository,GameRepository gameRepository,GameEventRespository gameEventRepository,InvitationRepository invitationRepository) {
         this.teamRepository = teamRepository;
         this.playerRepository = playerRepository;
         this.gameRepository = gameRepository;
+        this.gameEventRepository = gameEventRepository;
+        this.invitationRepository = invitationRepository;
     }
     private TeamDTO convertToTeamDTO(Team team) {
         TeamDTO dto = new TeamDTO();
@@ -152,13 +155,24 @@ public class TeamServiceImpl implements TeamService {
             playerRepository.save(player); // Save each player with the team set to null
         });
 
-        // Find all games where the team was involved and delete them
+        // Find all invitations related to the team and delete them
+        List<Invitation> invitations = invitationRepository.findByTeam(team);
+        invitations.forEach(invitation -> invitationRepository.delete(invitation));
+
+        // Find all games where the team was involved
         List<Game> games = gameRepository.findByTeamAOrTeamB(team, team);
-        games.forEach(game -> gameRepository.delete(game)); // Delete each game involving the team
+
+        // Find all game events related to the games and delete them
+        games.forEach(game -> {
+            List<GameEvent> gameEvents = gameEventRepository.findByGame(game);
+            gameEvents.forEach(gameEvent -> gameEventRepository.delete(gameEvent));
+            gameRepository.delete(game); // Delete each game involving the team
+        });
 
         // Delete the team
         teamRepository.delete(team);
     }
+
     @Override
     public Team getTeam(int teamId) {
         return teamRepository.findById(teamId)

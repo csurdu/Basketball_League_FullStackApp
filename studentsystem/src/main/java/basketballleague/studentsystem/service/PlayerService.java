@@ -37,9 +37,10 @@ public interface PlayerService {
     List<PlayerDTO> findByOrderByAssistsPerGameDsc();
     public void populateDatabaseWithFakeData();
     public void assignPlayersToRandomTeams();
-    Invitation sendInvitation(int playerId, int teamId);
+    public Invitation sendInvitation(int playerId, int teamId,String email);
     List<Invitation> getPendingInvitations(int userId);
     Invitation acceptInvitation(int invitationId);
     void rejectInvitation(int invitationId);
+    List<Invitation> getInvitationsSentByPlayer(int playerId);
 
 }

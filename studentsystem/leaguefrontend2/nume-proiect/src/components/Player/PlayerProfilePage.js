@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import './UserProfilePage.css';
+import axios from 'axios';
 
 const PlayerProfilePage = () => {
   const { playerId } = useParams();
-  const [profile, setProfile] = useState(null);
+  const [player, setPlayer] = useState(null);
   const token = localStorage.getItem('jwtToken');
 
   useEffect(() => {
@@ -16,88 +15,58 @@ const PlayerProfilePage = () => {
       }
     })
     .then(response => {
-
-      setProfile(response.data);
+      setPlayer(response.data);
     })
     .catch(error => console.error("There was an error fetching player profile!", error));
-  }, [token, playerId]);
+  }, [playerId, token]);
 
-  const exitTeam = () => {
-    if (!profile) return;
-
-    axios.post(`http://localhost:8080/player/removeFromTeam/${profile.id}`, {}, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then(() => {
-      alert('Player successfully removed from the team.');
-      // Optionally update the profile state or perform other actions here
-    })
-    .catch(error => {
-      console.error("Failed to remove player from team", error);
-      alert('Failed to remove player from team: ' + error.message);
-    });
-  };
-
-  if (!profile) {
+  if (!player) {
     return <p>Loading player data...</p>;
   }
 
-  const player = profile.player || {};
-  const profileImageUrl = player.profilePicture ? `http://localhost:8080/${player.profilePicture}` : '/profilePicture';
-
   return (
-    <div className="userProfile">
-      <h1 className="header">Player Profile</h1>
-      <div className="profile-container">
-        <div className="profile-header">
-          <div className="profile-image-placeholder">
-            <img src={profileImageUrl} alt="Profile" className="profile-image" onError={(e) => { e.target.src = '/default-profile.png'; }} />
-          </div>
-          <div className="profile-details">
-            <h2>{player.firstName} {player.lastName}</h2>
-            <p><strong>Team:</strong> {player.team ? player.team.name : 'Free Agent'}</p>
-            <p><strong>Height:</strong> {player.height || 'Not specified'}</p>
-            <p><strong>Captain:</strong> {profile.captain ? 'Yes' : 'No'}</p> {/* Afișează dacă este căpitan din profile */}
-            <p><strong>Total Scoring Percentage:</strong> {player.scoringPercentage ? player.scoringPercentage.toFixed(1) + '%' : 'N/A'}</p>
-            <p><strong>Games Played:</strong> {player.gamesPlayed || 'N/A'}</p>
-          </div>
+    <div className="max-w-6xl mx-auto p-8 bg-gradient-to-r from-white to-gray-200 shadow-lg rounded-lg">
+      <h1 className="text-3xl font-bold text-center mb-8 text-gray-700">Player Profile</h1>
+      <div className="flex flex-col md:flex-row md:space-x-8">
+        <div className="flex-grow">
+          <h2 className="text-2xl font-bold text-blue-500">{player.firstName} {player.lastName}</h2>
+          <p className="text-lg text-gray-600"><strong>Email:</strong> {player.email}</p>
+          <p className="text-lg text-gray-600"><strong>Team:</strong> {player.teamName ? player.teamName : 'Free Agent'}</p>
+          <p className="text-lg text-gray-600"><strong>Height:</strong> {player.height || 'Not specified'}</p>
+          <p className="text-lg text-gray-600"><strong>Total Scoring Percentage:</strong> {player.scoringPercentage ? player.scoringPercentage.toFixed(1) + '%' : 'N/A'}</p>
+          <p className="text-lg text-gray-600"><strong>Games Played:</strong> {player.gamesPlayed || 'N/A'}</p>
         </div>
-        <button className="button" onClick={exitTeam}>Exit Team</button>
-        <div className="stats-container">
-          <h3>Player Stats</h3>
-          <table className="statsTable">
-            <thead>
-              <tr>
-                <th>Team Name</th>
-                <th>Height</th>
-                <th>Points Per Game</th>
-                <th>Rebounds Per Game</th>
-                <th>Steals Per Game</th>
-                <th>Assists Per Game</th>
-                <th>1-Point %</th>
-                <th>2-Point %</th>
-                <th>3-Point %</th>
-                <th>Captain</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{player.team ? player.team.name : 'No Team'}</td>
-                <td>{player.height || 'Not specified'}</td>
-                <td>{player.pointsPerGame ? player.pointsPerGame.toFixed(1) : 'N/A'}</td>
-                <td>{player.reboundsPerGame ? player.reboundsPerGame.toFixed(1) : 'N/A'}</td>
-                <td>{player.stealsPerGame ? player.stealsPerGame.toFixed(1) : 'N/A'}</td>
-                <td>{player.assistsPerGame ? player.assistsPerGame.toFixed(1) : 'N/A'}</td>
-                <td>{player.onePointPercentage ? player.onePointPercentage.toFixed(1) + '%' : 'N/A'}</td>
-                <td>{player.twoPointPercentage ? player.twoPointPercentage.toFixed(1) + '%' : 'N/A'}</td>
-                <td>{player.threePointPercentage ? player.threePointPercentage.toFixed(1) + '%' : 'N/A'}</td>
-                <td>{profile.captain ? 'Yes' : 'No'}</td> {/* Afișează dacă este căpitan din profile */}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      </div>
+      <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-bold mb-4 text-gray-700">Player Stats</h3>
+        <table className="min-w-full bg-white">
+          <thead className="bg-gray-800 text-white">
+            <tr>
+              <th className="px-4 py-2">Team Name</th>
+              <th className="px-4 py-2">Height</th>
+              <th className="px-4 py-2">Points Per Game</th>
+              <th className="px-4 py-2">Rebounds Per Game</th>
+              <th className="px-4 py-2">Steals Per Game</th>
+              <th className="px-4 py-2">Assists Per Game</th>
+              <th className="px-4 py-2">1-Point %</th>
+              <th className="px-4 py-2">2-Point %</th>
+              <th className="px-4 py-2">3-Point %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="text-center bg-gray-100 border-b border-gray-200">
+              <td className="px-4 py-2">{player.teamName ? player.teamName : 'No Team'}</td>
+              <td className="px-4 py-2">{player.height || 'Not specified'}</td>
+              <td className="px-4 py-2">{player.pointsPerGame ? player.pointsPerGame.toFixed(1) : 'N/A'}</td>
+              <td className="px-4 py-2">{player.reboundsPerGame ? player.reboundsPerGame.toFixed(1) : 'N/A'}</td>
+              <td className="px-4 py-2">{player.stealsPerGame ? player.stealsPerGame.toFixed(1) : 'N/A'}</td>
+              <td className="px-4 py-2">{player.assistsPerGame ? player.assistsPerGame.toFixed(1) : 'N/A'}</td>
+              <td className="px-4 py-2">{player.onePointPercentage ? player.onePointPercentage.toFixed(1) + '%' : 'N/A'}</td>
+              <td className="px-4 py-2">{player.twoPointPercentage ? player.twoPointPercentage.toFixed(1) + '%' : 'N/A'}</td>
+              <td className="px-4 py-2">{player.threePointPercentage ? player.threePointPercentage.toFixed(1) + '%' : 'N/A'}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import { useNavigate } from 'react-router-dom';
-import './GameManagement.css';
 
 function GameManagement() {
   const [gameDetails, setGameDetails] = useState({
@@ -21,6 +20,8 @@ function GameManagement() {
   const [gameHistory, setGameHistory] = useState([]);
   const [scheduledGames, setScheduledGames] = useState([]);
   const [selectedGameId, setSelectedGameId] = useState(null);
+  const [simulationTimeLeft, setSimulationTimeLeft] = useState(0);
+  const timerRef = useRef(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('jwtToken');
 
@@ -45,6 +46,20 @@ function GameManagement() {
         const gameData = JSON.parse(gameUpdate.body);
         console.log("Received game data:", gameData);
 
+        if (timerRef.current === null) {
+          setSimulationTimeLeft(10); // Setează timpul de simulare la 10 secunde
+          timerRef.current = setInterval(() => {
+            setSimulationTimeLeft(prev => {
+              if (prev <= 1) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+
         const newResult = {
           scoreTeamA: gameData.scoreTeamA,
           scoreTeamB: gameData.scoreTeamB,
@@ -65,6 +80,10 @@ function GameManagement() {
 
       return () => {
         gameSubscription.unsubscribe();
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
       };
     }
   }, [stompClient, selectedGameId]);
@@ -147,6 +166,7 @@ function GameManagement() {
   const simulateGame = (gameId) => {
     if (selectedGameId !== gameId) { // Check to prevent duplicate simulations
       setSelectedGameId(gameId);
+      setSimulationResults([]); // Resetează rezultatele simulării
       const url = `http://localhost:8080/games/simulate/${gameId}`;
 
       fetch(url, {
@@ -171,17 +191,18 @@ function GameManagement() {
   };
 
   return (
-    <div className="game-management-container">
-      <div className="top-container">
-        <div className="create-game-container">
-          <h2>Create Game</h2>
+    <div className="container mx-auto p-4 bg-gray-100 rounded-lg shadow-md">
+      <div className="flex flex-col md:flex-row md:justify-between mb-8">
+        <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#333' }}>Create Game</h2>
           <input
             type="text"
             name="teamAname"
             value={gameDetails.teamAname}
             onChange={handleInputChange}
             placeholder="Team A Name"
-            className="input-field"
+            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: '#333' }}
           />
           <input
             type="text"
@@ -189,108 +210,118 @@ function GameManagement() {
             value={gameDetails.teamBname}
             onChange={handleInputChange}
             placeholder="Team B Name"
-            className="input-field"
+            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: '#333' }}
           />
-          <input
-            type="text"
+          <select
             name="location"
             value={gameDetails.location}
             onChange={handleInputChange}
-            placeholder="Location"
-            className="input-field"
-          />
+            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: '#333' }}
+          >
+            <option value="">Select Location</option>
+            <option value="Stadium A">Stadium A</option>
+            <option value="Stadium B">Stadium B</option>
+            <option value="Stadium C">Stadium C</option>
+            <option value="Stadium D">Stadium D</option>
+          </select>
           <input
             type="datetime-local"
             name="date"
             value={gameDetails.date}
             onChange={handleInputChange}
-            className="input-field"
+            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ color: '#333' }}
           />
-          <button onClick={createGame} className="button">Create Game</button>
+          <button onClick={createGame} className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300">Create Game</button>
         </div>
         {selectedGameId && (
-          <div className="simulation-details-container">
-            <h2>Simulation Details</h2>
-            <div className="stats-results-container">
-              <div className="team-stats">
-                <h4>Team A Player Stats</h4>
-                <ul>
+          <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md mt-8 md:mt-0">
+            <h2 className="text-xl font-bold mb-4" style={{ color: '#333' }}>Simulation Details</h2>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <h4 className="text-lg font-bold" style={{ color: '#333' }}>Team A Player Stats</h4>
+                <ul className="list-disc list-inside">
                   {teamAPlayers.map((player, index) => (
-                    <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
+                    <li key={index} style={{ color: '#333' }}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
                   ))}
                 </ul>
               </div>
-              <div className="results-container">
-                <h3>Simulation Results</h3>
-                <p>Team A Score: {gameDetails.teamAScore} — Team B Score: {gameDetails.teamBScore}</p>
-                <ul>
+              <div>
+                <h4 className="text-lg font-bold" style={{ color: '#333' }}>Team B Player Stats</h4>
+                <ul className="list-disc list-inside">
+                  {teamBPlayers.map((player, index) => (
+                    <li key={index} style={{ color: '#333' }}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold" style={{ color: '#333' }}>Simulation Results</h4>
+                <p style={{ color: '#333' }}>Team A Score: {gameDetails.teamAScore} — Team B Score: {gameDetails.teamBScore}</p>
+                <ul className="list-disc list-inside">
                   {simulationResults.map((result, index) => (
-                    <li key={index}>
+                    <li key={index} style={{ color: '#333' }}>
                       {result.scoreTeamA} - {result.scoreTeamB} -- Score Change
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="team-stats">
-                <h4>Team B Player Stats</h4>
-                <ul>
-                  {teamBPlayers.map((player, index) => (
-                    <li key={index}>{player.firstName} {player.lastName}: {player.inGamePoints} points, {player.inGameRebounds} rebounds, {player.inGameAssists} assists, {player.inGameSteals} steals</li>
-                  ))}
-                </ul>
+              <div className="mt-4" style={{ color: '#333' }}>
+                <h4 className="text-lg font-bold">Time left: {simulationTimeLeft} seconds</h4>
               </div>
             </div>
           </div>
         )}
       </div>
-      <div className="bottom-container">
-        <div className="scheduled-games-container">
-          <h2>Scheduled Games</h2>
-          <table className="scheduled-table">
-            <thead>
+      <div className="flex flex-col md:flex-row md:justify-between">
+        <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#333' }}>Scheduled Games</h2>
+          <table className="min-w-full bg-white">
+            <thead className="bg-gray-800 text-white">
               <tr>
-                <th>Date</th>
-                <th>Team A</th>
-                <th>Team B</th>
-                <th>Location</th>
-                <th>Simulate</th>
+                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Team A</th>
+                <th className="px-4 py-2">Team B</th>
+                <th className="px-4 py-2">Location</th>
+                <th className="px-4 py-2">Simulate</th>
               </tr>
             </thead>
             <tbody>
               {scheduledGames.map((game, index) => (
-                <tr key={index} style={{ cursor: 'pointer' }}>
-                  <td>{new Date(game.date).toLocaleString()}</td>
-                  <td>{game.team1Name}</td>
-                  <td>{game.team2Name}</td>
-                  <td>{game.location}</td>
-                  <td>
-                    <button onClick={() => simulateGame(game.id)} className="button">Simulate</button>
+                <tr key={index} className="bg-gray-100 border-b border-gray-200 hover:bg-gray-200">
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{new Date(game.date).toLocaleString()}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.team1Name}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.team2Name}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.location}</td>
+                  <td className="px-4 py-2">
+                    <button onClick={() => simulateGame(game.id)} className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300">Simulate</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="game-history-container">
-          <h2>Game History</h2>
-          <table className="history-table">
-            <thead>
+        <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md mt-8 md:mt-0">
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#333' }}>Game History</h2>
+          <table className="min-w-full bg-white">
+            <thead className="bg-gray-800 text-white">
               <tr>
-                <th>Date</th>
-                <th>Team A</th>
-                <th>Team B</th>
-                <th>Score</th>
-                <th>Location</th>
+                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Team A</th>
+                <th className="px-4 py-2">Team B</th>
+                <th className="px-4 py-2">Score</th>
+                <th className="px-4 py-2">Location</th>
               </tr>
             </thead>
             <tbody>
               {gameHistory.map((game, index) => (
-                <tr key={index} onClick={() => handleGameClick(game.id)} style={{ cursor: 'pointer' }}>
-                  <td>{new Date(game.date).toLocaleString()}</td>
-                  <td>{game.team1Name}</td>
-                  <td>{game.team2Name}</td>
-                  <td>{game.scoreA} - {game.scoreB}</td>
-                  <td>{game.location}</td>
+                <tr key={index} onClick={() => handleGameClick(game.id)} className="bg-gray-100 border-b border-gray-200 hover:bg-gray-200 cursor-pointer">
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{new Date(game.date).toLocaleString()}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.team1Name}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.team2Name}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.scoreA} - {game.scoreB}</td>
+                  <td className="px-4 py-2" style={{ color: '#333' }}>{game.location}</td>
                 </tr>
               ))}
             </tbody>

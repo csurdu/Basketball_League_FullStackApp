@@ -34,7 +34,7 @@ public class UserController {
             dto.setCaptain(true);
         }
         dto.setProfilePicture(user.getProfilePicture());
-
+dto.setRole(user.getRole().name());
         return dto;
     }
     @GetMapping("/me")
