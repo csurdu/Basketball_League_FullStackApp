@@ -44,7 +44,7 @@ function TeamList() {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4" style={{ color: '#333' }}>Team List</h2>
+      <h2 className="title text-2xl font-bold mb-4">Team List</h2> {/* Aplicați clasa title aici */}
       <div className="flex flex-wrap mb-4 space-x-4">
         <div className="flex items-center space-x-2">
           <label htmlFor="sortField" className="text-gray-700">Sort by:</label>

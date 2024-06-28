@@ -9,6 +9,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
+import Container from '@mui/material/Container';
+import Avatar from '@mui/material/Avatar';
 
 function TeamDetails() {
   const { teamName } = useParams();
@@ -38,40 +41,54 @@ function TeamDetails() {
   }, [teamName, token]);
 
   if (!teamDetails) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Typography variant="h4">Team: {teamDetails.name}</Typography>
-      <Typography variant="h6">Year: {teamDetails.year}</Typography>
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Avatar
+          alt={teamDetails.name}
+          sx={{ width: 100, height: 100, mx: 'auto', mb: 2 }}
+        />
+        <Typography variant="h4" component="h1" gutterBottom color="primary">
+          Team: {teamDetails.name}
+        </Typography>
+        <Typography variant="h6" component="h2" color="textSecondary">
+          Year: {teamDetails.year}
+        </Typography>
+      </Box>
+      <TableContainer component={Paper} sx={{ mt: 4 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Player Name</TableCell>
-              <TableCell>Height</TableCell>
-              <TableCell>Points Per Game</TableCell>
-              <TableCell>Rebounds Per Game</TableCell>
-              <TableCell>Steals Per Game</TableCell>
-              <TableCell>Assists Per Game</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Player Name</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Height</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Points Per Game</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Rebounds Per Game</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Steals Per Game</TableCell>
+              <TableCell align="center" sx={{ color: 'white', backgroundColor: 'gray' }}>Assists Per Game</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {teamDetails.playerList.map((player, index) => (
               <TableRow key={index}>
-                <TableCell>{`${player.firstName} ${player.lastName}`}</TableCell>
-                <TableCell>{player.height} cm</TableCell>
-                <TableCell>{player.pointsPerGame}</TableCell>
-                <TableCell>{player.reboundsPerGame}</TableCell>
-                <TableCell>{player.stealsPerGame}</TableCell>
-                <TableCell>{player.assistsPerGame}</TableCell>
+                <TableCell align="center">{`${player.firstName} ${player.lastName}`}</TableCell>
+                <TableCell align="center">{player.height} cm</TableCell>
+                <TableCell align="center">{player.pointsPerGame.toFixed(1)}</TableCell>
+                <TableCell align="center">{player.reboundsPerGame.toFixed(1)}</TableCell>
+                <TableCell align="center">{player.stealsPerGame.toFixed(1)}</TableCell>
+                <TableCell align="center">{player.assistsPerGame.toFixed(1)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-    </Box>
+    </Container>
   );
 }
 

@@ -13,7 +13,7 @@ function CreateTeam() {
   const [profile, setProfile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -27,9 +27,9 @@ function CreateTeam() {
           }
         });
         setProfile(data);
-        // Check if the user has the admin role
-        if (data.role == 'ADMIN') {
-          setIsAdmin(true);
+        // Check if the user has the admin or captain role
+        if (data.role === 'ADMIN' || data.role === 'CAPTAIN') {
+          setHasPermission(true);
         }
       } catch (error) {
         console.error("There was an error fetching user profile!", error);
@@ -72,7 +72,7 @@ function CreateTeam() {
 
   const handleDeleteTeam = async (e) => {
     e.preventDefault();
-    if (!isAdmin) {
+    if (!hasPermission) {
       alert('You do not have permission to delete a team.');
       return;
     }
@@ -96,13 +96,13 @@ function CreateTeam() {
   return (
     <div className="background-container">
       <div className="form-container">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">Manage Teams</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-black">Manage Teams</h1>
 
         {/* Create Team Form */}
         <form onSubmit={handleCreateTeam} className="space-y-4 mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-700">Create a New Team</h2>
+          <h2 className="text-xl font-bold mb-4 text-black">Create a New Team</h2>
           <div>
-            <label htmlFor="teamName" className="block text-gray-700">Team Name:</label>
+            <label htmlFor="teamName" className="block text-black">Team Name:</label>
             <input
               type="text"
               id="teamName"
@@ -115,7 +115,7 @@ function CreateTeam() {
             />
           </div>
           <div>
-            <label htmlFor="teamYear" className="block text-gray-700">Team Year:</label>
+            <label htmlFor="teamYear" className="block text-black">Team Year:</label>
             <input
               type="number"
               id="teamYear"
@@ -138,9 +138,9 @@ function CreateTeam() {
 
         {/* Delete Team Form */}
         <form onSubmit={handleDeleteTeam} className="space-y-4">
-          <h2 className="text-xl font-bold mb-4 text-gray-700">Delete a Team</h2>
+          <h2 className="text-xl font-bold mb-4 text-black">Delete a Team</h2>
           <div>
-            <label htmlFor="deleteTeamName" className="block text-gray-700">Team Name:</label>
+            <label htmlFor="deleteTeamName" className="block text-black">Team Name:</label>
             <input
               type="text"
               id="deleteTeamName"
@@ -156,11 +156,11 @@ function CreateTeam() {
           <button
             type="submit"
             className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
-            disabled={!isAdmin} // Disable the button if not admin
+            disabled={!hasPermission} // Disable the button if no permission
           >
             Delete Team
           </button>
-          {!isAdmin && <p className="text-red-500">Only admins can delete teams.</p>}
+          {!hasPermission && <p className="text-red-500">Only admins or captains can delete teams.</p>}
         </form>
       </div>
     </div>

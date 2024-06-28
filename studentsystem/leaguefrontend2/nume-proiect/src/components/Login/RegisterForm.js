@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { NavLink } from 'react-router-dom';
+import './styles.css'; // Importați fișierul CSS pentru stiluri
 
 const RegisterForm = ({ onRegisterSuccess }) => {
     const [firstName, setFirstName] = useState('');
@@ -49,31 +50,66 @@ const RegisterForm = ({ onRegisterSuccess }) => {
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold text-center mt-4">Register</h2>
+                <h2 className="text-2xl font-bold text-center mt-4 text-gray-800" style={{ color: '#333', opacity: 1 }}>Register</h2>
                 <form onSubmit={handleSubmit} className="mt-4">
                     <div className="mb-4">
-                        <label className="block text-gray-700">Nume</label>
-                        <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Nume</label>
+                        <input 
+                            type="text" 
+                            value={firstName} 
+                            onChange={(e) => setFirstName(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Prenume</label>
-                        <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Prenume</label>
+                        <input 
+                            type="text" 
+                            value={lastName} 
+                            onChange={(e) => setLastName(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Email</label>
+                        <input 
+                            type="email" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Parolă</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Parolă</label>
+                        <input 
+                            type="password" 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Height</label>
-                        <input type="text" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Height</label>
+                        <input 
+                            type="text" 
+                            value={height} 
+                            onChange={(e) => setHeight(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Role</label>
-                        <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full p-2 border border-gray-300 rounded mt-1">
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Role</label>
+                        <select 
+                            value={role} 
+                            onChange={(e) => setRole(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        >
                             <option value="">Select a role</option>
                             <option value="PLAYER_NORMAL">PLAYER_NORMAL</option>
                             <option value="CAPTAIN">CAPTAIN</option>
@@ -81,15 +117,20 @@ const RegisterForm = ({ onRegisterSuccess }) => {
                         </select>
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Profile Picture</label>
-                        <input type="file" onChange={(e) => setProfilePicture(e.target.files[0])} className="w-full p-2 border border-gray-300 rounded mt-1" />
+                        <label className="block text-gray-700" style={{ color: '#333', opacity: 1 }}>Profile Picture</label>
+                        <input 
+                            type="file" 
+                            onChange={(e) => setProfilePicture(e.target.files[0])} 
+                            className="w-full p-2 border border-gray-300 rounded mt-1 input-text" 
+                            style={{ color: '#333', opacity: 1 }}
+                        />
                     </div>
                     <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200">Înregistrare</button>
                     {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                     {successMessage && <p className="text-green-500 text-sm mt-2">{successMessage}</p>}
                 </form>
                 <div className="text-center mt-4">
-                    <NavLink to="/login" className="text-blue-500 hover:underline">Already have an account? Sign In</NavLink>
+                    <NavLink to="/login" className="text-blue-600 hover:underline">Already have an account? Sign In</NavLink>
                 </div>
             </div>
         </div>
