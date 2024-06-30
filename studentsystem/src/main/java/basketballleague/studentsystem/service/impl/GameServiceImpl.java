@@ -74,7 +74,7 @@ public class GameServiceImpl implements GameService {
         messagingTemplate.convertAndSend("/topic/gameplay/" + game.getId(), game);
 
         long startTime = System.currentTimeMillis();
-        long gameDuration = 10000; // 10 seconds
+        long gameDuration = 15000; // 15 seconds
 
         while (System.currentTimeMillis() - startTime < gameDuration) {
             boolean updateTeamA = random.nextBoolean();
@@ -134,14 +134,17 @@ public class GameServiceImpl implements GameService {
     private Player selectScoringPlayer(Team team) {
         List<Player> players = playerRepository.findByTeam(team);
 
+        // Introduce a baseline probability to reduce the influence of the weight
+        double baselineProbability = 0.9; // You can adjust this value to control the influence of the weights
         double totalWeight = players.stream().mapToDouble(this::calculatePlayerWeight).sum();
+
         if (totalWeight == 0) {
             return players.get(random.nextInt(players.size())); // Fallback in case all weights are 0
         }
 
-        double randomValue = random.nextDouble() * totalWeight;
+        double randomValue = random.nextDouble() * (totalWeight + baselineProbability * players.size());
         for (Player player : players) {
-            randomValue -= calculatePlayerWeight(player);
+            randomValue -= (calculatePlayerWeight(player) + baselineProbability);
             if (randomValue <= 0) {
                 return player;
             }
@@ -191,6 +194,7 @@ public class GameServiceImpl implements GameService {
 
         return totalWeight;
     }
+
 
 
 
@@ -264,13 +268,19 @@ public class GameServiceImpl implements GameService {
 
         if (pointsType == 1) {
             player.setInGame1PointAttempts(player.getInGame1PointAttempts() + attemptsChange);
+            player.setTotal1PointAttempts(player.getTotal1PointAttempts() + attemptsChange); // Actualizează tentativele totale
             player.setInGame1PointMade(player.getInGame1PointMade() + (scoreChange > 0 ? 1 : 0));
+            player.setTotal1PointMade(player.getTotal1PointMade() + (scoreChange > 0 ? 1 : 0)); // Actualizează reușitele totale
         } else if (pointsType == 2) {
             player.setInGame2PointAttempts(player.getInGame2PointAttempts() + attemptsChange);
+            player.setTotal2PointAttempts(player.getTotal2PointAttempts() + attemptsChange);
             player.setInGame2PointMade(player.getInGame2PointMade() + (scoreChange > 0 ? 1 : 0));
+            player.setTotal2PointMade(player.getTotal2PointMade() + (scoreChange > 0 ? 1 : 0));
         } else if (pointsType == 3) {
             player.setInGame3PointAttempts(player.getInGame3PointAttempts() + attemptsChange);
+            player.setTotal3PointAttempts(player.getTotal3PointAttempts() + attemptsChange);
             player.setInGame3PointMade(player.getInGame3PointMade() + (scoreChange > 0 ? 1 : 0));
+            player.setTotal3PointMade(player.getTotal3PointMade() + (scoreChange > 0 ? 1 : 0));
         }
 
         player.setInGameRebounds(player.getInGameRebounds() + reboundsChange);
@@ -315,9 +325,21 @@ public class GameServiceImpl implements GameService {
             updateReboundsPerGame(player);
             updateStealsPerGame(player);
             updateAssistsPerGame(player);
+            updateTotalStats(player); // Metodă nouă pentru a actualiza statisticile totale
             updateScoringPercentages(player);
         });
     }
+
+    private void updateTotalStats(Player player) {
+        player.setTotal1PointAttempts(player.getTotal1PointAttempts() + player.getInGame1PointAttempts());
+        player.setTotal2PointAttempts(player.getTotal2PointAttempts() + player.getInGame2PointAttempts());
+        player.setTotal3PointAttempts(player.getTotal3PointAttempts() + player.getInGame3PointAttempts());
+
+        player.setTotal1PointMade(player.getTotal1PointMade() + player.getInGame1PointMade());
+        player.setTotal2PointMade(player.getTotal2PointMade() + player.getInGame2PointMade());
+        player.setTotal3PointMade(player.getTotal3PointMade() + player.getInGame3PointMade());
+    }
+
 
     private Player getRandomPlayer(Team team) {
         List<Player> players = playerRepository.findByTeam(team);

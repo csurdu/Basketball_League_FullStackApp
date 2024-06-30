@@ -44,6 +44,13 @@ public class Player {
     private int inGame1PointMade; // Successful 1-point shots
     private int inGame2PointMade; // Successful 2-point shots
     private int inGame3PointMade; // Successful 3-point shots
+    private int total1PointAttempts;
+    private int total2PointAttempts;
+    private int total3PointAttempts;
+
+    private int total1PointMade;
+    private int total2PointMade;
+    private int total3PointMade;
 
     private int gamesPlayed;
     private int pointsPerGame;
@@ -80,8 +87,8 @@ public class Player {
     }
 
     public void updateScoringPercentages() {
-        int totalAttempts = this.inGame1PointAttempts + this.inGame2PointAttempts + this.inGame3PointAttempts;
-        int totalMade = this.inGame1PointMade + this.inGame2PointMade + this.inGame3PointMade;
+        int totalAttempts = this.total1PointAttempts + this.total2PointAttempts + this.total3PointAttempts;
+        int totalMade = this.total1PointMade + this.total2PointMade;
 
         if (totalAttempts > 0) {
             this.scoringPercentage = ((float) totalMade / totalAttempts) * 100;
@@ -89,20 +96,20 @@ public class Player {
             this.scoringPercentage = 0;
         }
 
-        if (this.inGame1PointAttempts > 0) {
-            this.onePointPercentage = ((float) this.inGame1PointMade / this.inGame1PointAttempts) * 100;
+        if (this.total1PointAttempts > 0) {
+            this.onePointPercentage = ((float) this.total1PointMade / this.total1PointAttempts) * 100;
         } else {
             this.onePointPercentage = 0;
         }
 
-        if (this.inGame2PointAttempts > 0) {
-            this.twoPointPercentage = ((float) this.inGame2PointMade / this.inGame2PointAttempts) * 100;
+        if (this.total2PointAttempts > 0) {
+            this.twoPointPercentage = ((float) this.total2PointMade / this.total2PointAttempts) * 100;
         } else {
             this.twoPointPercentage = 0;
         }
 
-        if (this.inGame3PointAttempts > 0) {
-            this.threePointPercentage = ((float) this.inGame3PointMade / this.inGame3PointAttempts) * 100;
+        if (this.total3PointAttempts > 0) {
+            this.threePointPercentage = ((float) this.total3PointMade / this.total3PointAttempts) * 100;
         } else {
             this.threePointPercentage = 0;
         }

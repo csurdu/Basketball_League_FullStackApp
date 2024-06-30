@@ -70,18 +70,18 @@ function GameDetails() {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-md">
       <div className="bg-gray-800 text-white p-4 rounded-t-lg">
-        <h2 className="text-2xl font-bold">Game Details</h2>
+        <h2 className="text-2xl font-bold text-white">Game Details</h2> {/* Updated title color to white */}
       </div>
       <div className="relative my-8">
         <img src={basketballCourtImage} alt="Basketball Court" className="w-full rounded-lg shadow-md" />
         <div className="absolute inset-0 flex justify-between items-start p-4 text-xl font-bold text-black">
-          <div className="bg-black bg-opacity-80 p-2 rounded text-white">Team A Score: {gameDetails.scoreTeamA}</div>
-          <div className="bg-black bg-opacity-80 p-2 rounded text-white">Team B Score: {gameDetails.scoreTeamB}</div>
+          <div className="bg-black bg-opacity-80 p-2 rounded text-white">Team {gameDetails.teamA.name} Score: {gameDetails.scoreTeamA}</div>
+          <div className="bg-black bg-opacity-80 p-2 rounded text-white">Team {gameDetails.teamB.name} Score: {gameDetails.scoreTeamB}</div>
         </div>
       </div>
       <div className="flex flex-col md:flex-row justify-between mb-8">
         <div className="w-full md:w-1/2 mb-4 md:mb-0">
-          <h4 className="text-xl font-bold text-black text-center mb-2">Team A Player Stats</h4>
+          <h4 className="text-xl font-bold text-black text-center mb-2">Team {gameDetails.teamA.name} Players Stats</h4>
           <ul className="list-none p-0">
             {gameDetails.teamAPlayerStats.map((player, index) => (
               <li key={index} className="bg-gray-200 text-black p-2 mb-2 rounded-lg shadow-sm">
@@ -91,7 +91,7 @@ function GameDetails() {
           </ul>
         </div>
         <div className="w-full md:w-1/2">
-          <h4 className="text-xl font-bold text-black text-center mb-2">Team B Player Stats</h4>
+          <h4 className="text-xl font-bold text-black text-center mb-2">Team {gameDetails.teamB.name} Players Stats</h4>
           <ul className="list-none p-0">
             {gameDetails.teamBPlayerStats.map((player, index) => (
               <li key={index} className="bg-gray-200 text-black p-2 mb-2 rounded-lg shadow-sm">
@@ -102,7 +102,7 @@ function GameDetails() {
         </div>
       </div>
       <div className="bg-gray-200 p-4 rounded-lg shadow-sm">
-        <h3 className="text-xl font-bold mb-4 text-black">Game Events</h3>
+        <h3 className="text-xl font-bold mb-4 text-black">Game History</h3>
         <ul className="list-none p-0">
           {gameDetails.events.map((event, index) => (
             <li key={index} className="bg-white text-black p-2 mb-2 rounded-lg shadow-sm">

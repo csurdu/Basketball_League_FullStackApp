@@ -107,7 +107,8 @@ const Invitations = ({ token }) => {
         }
     })
     .then(() => {
-        setInvitations(invitations.filter(inv => inv.id !== invitationId));
+        // Remove all invitations after accepting one
+        setInvitations([]);
         alert('Invitation accepted!');
     })
     .catch(error => {
@@ -123,8 +124,8 @@ const Invitations = ({ token }) => {
       }
     })
     .then(() => {
-      alert('Invitation rejected');
       setInvitations(invitations.filter(inv => inv.id !== invitationId));
+      alert('Invitation rejected');
     })
     .catch(error => console.error("Failed to reject invitation", error));
   };
@@ -139,6 +140,12 @@ const Invitations = ({ token }) => {
       alert('Invitation sent successfully to ' + inviteeEmail);
       setInviteeEmail('');
       setErrorMessage('');
+
+      // Update the sent invitations list without a page refresh
+      setSentInvitations(prevSentInvitations => [
+        ...prevSentInvitations,
+        { player: { firstName: inviteeEmail, lastName: '' }, team: { name: teamName }, status: 'PENDING' }
+      ]);
     })
     .catch(error => {
       console.error("Failed to send invitation", error);

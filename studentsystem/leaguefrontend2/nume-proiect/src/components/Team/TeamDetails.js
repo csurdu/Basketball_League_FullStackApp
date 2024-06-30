@@ -11,7 +11,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 
 function TeamDetails() {
   const { teamName } = useParams();
@@ -51,14 +50,10 @@ function TeamDetails() {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Avatar
-          alt={teamDetails.name}
-          sx={{ width: 100, height: 100, mx: 'auto', mb: 2 }}
-        />
-        <Typography variant="h4" component="h1" gutterBottom color="primary">
+        <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'white', textShadow: '2px 2px 4px #000000' }}>
           Team: {teamDetails.name}
         </Typography>
-        <Typography variant="h6" component="h2" color="textSecondary">
+        <Typography variant="h6" component="h2" sx={{ color: 'white', textShadow: '1px 1px 2px #000000' }}>
           Year: {teamDetails.year}
         </Typography>
       </Box>

@@ -30,6 +30,9 @@ function CreateTeam() {
         // Check if the user has the admin or captain role
         if (data.role === 'ADMIN' || data.role === 'CAPTAIN') {
           setHasPermission(true);
+          if (data.player?.team) {
+            setDeleteTeamName(data.player.team.name);
+          }
         }
       } catch (error) {
         console.error("There was an error fetching user profile!", error);
@@ -146,8 +149,7 @@ function CreateTeam() {
               id="deleteTeamName"
               name="deleteTeamName"
               value={deleteTeamName}
-              onChange={(e) => setDeleteTeamName(e.target.value)}
-              placeholder="Enter team name to delete"
+              readOnly
               required
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-red-500"
             />

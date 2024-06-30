@@ -23,9 +23,7 @@ function GameManagement() {
   const [gameHistory, setGameHistory] = useState([]);
   const [scheduledGames, setScheduledGames] = useState([]);
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [simulationTimeLeft, setSimulationTimeLeft] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
-  const timerRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const token = localStorage.getItem('jwtToken');
@@ -74,20 +72,6 @@ function GameManagement() {
         const gameData = JSON.parse(gameUpdate.body);
         console.log("Received game data:", gameData);
 
-        if (timerRef.current === null) {
-          setSimulationTimeLeft(10); // Set the simulation time to 10 seconds
-          timerRef.current = setInterval(() => {
-            setSimulationTimeLeft(prev => {
-              if (prev <= 1) {
-                clearInterval(timerRef.current);
-                timerRef.current = null;
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-        }
-
         const newResult = {
           scoreTeamA: gameData.scoreTeamA,
           scoreTeamB: gameData.scoreTeamB,
@@ -108,10 +92,6 @@ function GameManagement() {
 
       return () => {
         gameSubscription.unsubscribe();
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
       };
     }
   }, [stompClient, selectedGameId]);
@@ -188,7 +168,16 @@ function GameManagement() {
     .then(data => {
       setGameDetails(prev => ({ ...prev, gameId: data.id }));
       alert('Game created successfully!');
-      fetchScheduledGames(); // Refresh the scheduled games list
+      setScheduledGames(prevScheduledGames => [
+        ...prevScheduledGames,
+        {
+          id: data.id,
+          date: gameDetails.date,
+          team1Name: gameDetails.teamAname,
+          team2Name: gameDetails.teamBname,
+          location: gameDetails.location
+        }
+      ]);
     })
     .catch(error => {
       console.error("Failed to create game!", error);
@@ -309,9 +298,6 @@ function GameManagement() {
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  <div className="mt-4" style={{ color: '#333' }}>
-                    <h4 className="text-lg font-bold">Time left: {simulationTimeLeft} seconds</h4>
                   </div>
                 </div>
               </div>
